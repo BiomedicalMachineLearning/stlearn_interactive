@@ -19,7 +19,7 @@ def make_ptvis_plot(data):
     list_index = {}
     tmp = list(data.obs["louvain"])
 
-    for cl in np.sort(data.obs["louvain"].unique()):
+    for cl in np.sort(data.obs["louvain"].unique().astype(int)).astype(str):
         list_index[cl] = [i for i, x in enumerate(tmp) if x == cl]
     
 
@@ -194,7 +194,7 @@ def make_ptvis_plot(data):
     tissue_alpha = Slider(title="Tissue alpha", value=1.0, start=0, end=1.0, step=0.1,sizing_mode='fixed')
     #tissue_alpha.on_change('value',update_data)
 
-    root = Select(title="Choose root:", value="0",options=list(np.sort(data.obs["louvain"].unique())))
+    root = Select(title="Choose root:", value="0",options=list(np.sort(data.obs["louvain"].unique().astype(int)).astype(str)))
     root.on_change('value',update_spot)
 
     spot_index = Slider(start=0, end=len(data.obs[data.obs["louvain"] == "0"]), value=0, step=1, title="Spot index",sizing_mode='fixed')
@@ -205,8 +205,8 @@ def make_ptvis_plot(data):
 
     p = Paragraph(text="""Choose clusters to display:""", width=400, height=20,sizing_mode='fixed')
 
-    list_cluster = CheckboxGroup(labels=list(np.sort(data.obs["louvain"].unique())), 
-        active=list(np.sort(data.obs["louvain"].unique()).astype(int)))
+    list_cluster = CheckboxGroup(labels=list(np.sort(data.obs["louvain"].unique().astype(int)).astype(str)), 
+        active=list(np.sort(data.obs["louvain"].unique().astype(int))))
     #list_cluster.on_change('active',update_data)
 
     ps_bt = Button(label='Do pseudotime analysis',button_type="success", sizing_mode='fixed')
@@ -220,7 +220,7 @@ def make_ptvis_plot(data):
     header_pst = Div(text="""<h2>Pseudo-space-time. Local analysis </h2>""",
     width=400, height=30, sizing_mode='fixed')
 
-    cluster_pst = Select(title="Choose clusters:", value="0",options=list(np.sort(data.obs["louvain"].unique())),sizing_mode='fixed')
+    cluster_pst = Select(title="Choose clusters:", value="0",options=list(np.sort(data.obs["louvain"].unique().astype(int)).astype(str)),sizing_mode='fixed')
     cluster_pst.on_change('value',change_pst)
 
     weight_pst = Slider(title="PSTD weight", value=0.0, start=0, end=1.0, step=0.1,sizing_mode='fixed')
@@ -251,7 +251,7 @@ def make_ptvis_plot(data):
 
     p = Paragraph(text="""Choose clusters:""",width=400, height=20)
 
-    list_cluster_pstg = CheckboxGroup(labels=list(np.sort(data.obs["louvain"].unique())), sizing_mode='fixed')
+    list_cluster_pstg = CheckboxGroup(labels=list(np.sort(data.obs["louvain"].unique().astype(int)).astype(str)), sizing_mode='fixed')
     #list_cluster_pstg.on_change('value',change_pstg)
 
     weight_pstg = Slider(title="PSTD weight", value=0.0, start=0, end=1.0, step=0.1,sizing_mode='fixed')

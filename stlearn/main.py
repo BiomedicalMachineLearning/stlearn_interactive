@@ -159,6 +159,7 @@ def doing_smeclust():
 
         if cl_method.value == "Louvain clustering":
             st.pp.neighbors(data,n_neighbors=knn_slider.value,use_rep='X_pca_morphology',random_state=0)
+            st.tl.clustering.louvain(data,random_state=0)
 
             get_cluster_color(data,use_label="louvain")
 

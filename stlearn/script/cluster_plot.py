@@ -37,7 +37,7 @@ def make_cluster_plot(data,use_label):
     list_index = {}
     tmp = list(data.obs[use_label])
 
-    for cl in np.sort(data.obs[use_label].unique()):
+    for cl in np.sort(data.obs[use_label].unique().astype(int)).astype(str):
         list_index[cl] = [i for i, x in enumerate(tmp) if x == cl]
 
  
@@ -62,7 +62,7 @@ def make_cluster_plot(data,use_label):
         x = coordinate[:,0]
         y = coordinate[:,1]
 
-        category_items = np.sort(data.obs[use_label].unique())
+        category_items = np.sort(data.obs[use_label].unique().astype(int)).astype(str)
         palette = data.uns["tmp_color"]
         colormap = dict(zip(category_items, palette))
         color = list(tmp[use_label].map(colormap))
@@ -108,8 +108,8 @@ def make_cluster_plot(data,use_label):
 
     p = Paragraph(text="""Choose clusters:""",
     width=400, height=20)
-    list_cluster = CheckboxGroup(labels=list(np.sort(data.obs[use_label].unique())), 
-        active=list(np.sort(data.obs[use_label].unique()).astype(int)))
+    list_cluster = CheckboxGroup(labels=list(np.sort(data.obs["louvain"].unique().astype(int)).astype(str)), 
+        active=list(np.sort(data.obs["louvain"].unique().astype(int))))
     list_cluster.on_change('active',update_data)
 
     
