@@ -30,3 +30,7 @@ Run the stlearn app:
 ``` cd stlearn_interactive ```
 
 ``` bokeh serve --show stlearn ```
+
+# Tutorial:
+
+Please open wiki page for the tutorial: [Wiki](https://github.com/BiomedicalMachineLearning/stlearn_interactive/wiki/stLearn-interactive-tutorial)
