@@ -56,9 +56,9 @@ def make_ptvis_plot(data):
             del data.obsm["X_draw_graph_fr"]
         except:
             pass
-
+        st.pl.cluster_plot(data,use_label="louvain",show_plot=False)
         data.uns["iroot"] = np.flatnonzero(data.obs["louvain"] == str(root))[spot_index]
-        st.spatial.trajectory.pseudotime(data, eps=eps)
+        st.spatial.trajectory.pseudotime(data, eps=eps, use_rep="X_pca")
 
         if len(inputs.children) == 10:
             inputs.children.pop()
@@ -134,11 +134,11 @@ def make_ptvis_plot(data):
         if spot_index == inputs.children[2]:
             del inputs.children[3]
 
-    def create_figures(data, cluster, weight, reverse, tissue_alpha, data_alpha):
+    def create_figures(data, cluster, reverse, tissue_alpha, data_alpha):
         fig, a = plt.subplots()
 
         st.spatial.trajectory.local_level(
-            data, use_label="louvain", cluster=cluster, w=weight
+            data, use_label="louvain", cluster=cluster
         )
 
         # if len(pst_layout.children) == 8:
@@ -203,7 +203,6 @@ def make_ptvis_plot(data):
         fig, fig2 = create_figures(
             data,
             cluster_pst.value,
-            weight_pst.value,
             reverse.active,
             tissue_alpha_pst.value,
             data_alpha_pst.value,
@@ -212,7 +211,7 @@ def make_ptvis_plot(data):
         figures = row([fig, fig2])
         pst_layout.children.insert(6, figures)
 
-    def doing_pstg(list_cluster, weight, data_alpha, tissue_alpha):
+    def doing_pstg(list_cluster, data_alpha, tissue_alpha):
 
         fig, a = plt.subplots()
 
@@ -226,8 +225,8 @@ def make_ptvis_plot(data):
         for f in filelist:
             os.remove(os.path.join("stlearn/static/", f))
 
-        st.spatial.trajectory.global_level(
-            data, use_label="louvain", list_cluster=list_cluster, w=weight
+        st.spatial.trajectory.pseudotimespace_global(
+            data, use_label="louvain", list_cluster=list_cluster
         )
 
         st.pl.cluster_plot(
@@ -246,7 +245,7 @@ def make_ptvis_plot(data):
         )
 
         st.pl.trajectory.tree_plot(
-            data, dpi=150, output="stlearn/static/", name="tmp" + str(id_img2)
+            data, dpi=150, output="stlearn/static/", name="tmp" + str(id_img2),show_plot=False
         )
 
         fig = Div(
@@ -278,7 +277,6 @@ def make_ptvis_plot(data):
         curdoc().add_next_tick_callback(
             doing_pstg(
                 list_cluster_pstg.active,
-                weight_pstg.value,
                 data_alpha_pstg.value,
                 tissue_alpha_pstg.value,
             )
@@ -363,11 +361,6 @@ def make_ptvis_plot(data):
     )
     cluster_pst.on_change("value", change_pst)
 
-    weight_pst = Slider(
-        title="PSTD weight", value=0.0, start=0, end=1.0, step=0.1, sizing_mode="fixed"
-    )
-    weight_pst.on_change("value", change_pst)
-
     reverse = RadioGroup(labels=["Reverse", "Inverse"], active=0, sizing_mode="fixed")
     reverse.on_change("active", change_pst)
 
@@ -382,14 +375,13 @@ def make_ptvis_plot(data):
     tissue_alpha_pst.on_change("value", change_pst)
 
     pst_layout = column(
-        [header_pst, cluster_pst, weight_pst, reverse, data_alpha_pst, tissue_alpha_pst]
+        [header_pst, cluster_pst, reverse, data_alpha_pst, tissue_alpha_pst]
     )
 
     figures = row(
         create_figures(
             data,
             cluster_pst.value,
-            weight_pst.value,
             reverse.active,
             tissue_alpha_pst.value,
             data_alpha_pst.value,
@@ -415,10 +407,6 @@ def make_ptvis_plot(data):
     )
     # list_cluster_pstg.on_change('value',change_pstg)
 
-    weight_pstg = Slider(
-        title="PSTD weight", value=0.0, start=0, end=1.0, step=0.1, sizing_mode="fixed"
-    )
-    # weight_pstg.on_change('value',change_pstg)
 
     data_alpha_pstg = Slider(
         title="Spot alpha", value=1.0, start=0, end=1.0, step=0.1, sizing_mode="fixed"
@@ -442,7 +430,6 @@ def make_ptvis_plot(data):
             header_pstg,
             p,
             list_cluster_pstg,
-            weight_pstg,
             data_alpha_pstg,
             tissue_alpha_pstg,
             ps_bt,

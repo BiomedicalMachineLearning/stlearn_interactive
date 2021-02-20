@@ -160,7 +160,7 @@ def doing_smeclust():
         if cl_method.value == "Louvain clustering":
             st.pp.neighbors(data,n_neighbors=knn_slider.value,use_rep='X_pca_morphology',random_state=0)
             st.tl.clustering.louvain(data,random_state=0)
-
+            st.pl.cluster_plot(data,use_label="louvain",show_plot=False)
             get_cluster_color(data,use_label="louvain")
 
             plot_cluster = make_cluster_plot(data,"louvain")
@@ -168,17 +168,21 @@ def doing_smeclust():
 
         else:
             st.tl.clustering.kmeans(data,n_clusters=n_clusters.value,use_data="X_pca_morphology")
+            st.pl.cluster_plot(data,use_label="kmeans",show_plot=False)
             get_cluster_color(data,use_label="kmeans")
             plot_cluster = make_cluster_plot(data,"kmeans")
     else:
+        print("Choose non-SME")
         if cl_method.value == "Louvain clustering":
             st.pp.neighbors(data,n_neighbors=knn_slider.value,use_rep='X_pca',random_state=0)
             st.tl.clustering.louvain(data,random_state=0)
+            st.pl.cluster_plot(data,use_label="louvain",show_plot=False)
             get_cluster_color(data,use_label="louvain")
             plot_cluster = make_cluster_plot(data,"louvain")
-  
+            
         else:
             st.tl.clustering.kmeans(data,n_clusters=n_clusters.value,use_data="X_pca")
+            st.pl.cluster_plot(data,use_label="kmeans",show_plot=False)
             get_cluster_color(data,use_label="kmeans")
             plot_cluster = make_cluster_plot(data,"kmeans")
 
