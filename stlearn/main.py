@@ -4,6 +4,7 @@ from bokeh.models import TextInput, Button, Paragraph, Select, Div, \
                         RadioGroup, Slider
 from bokeh.layouts import column, row
 import stlearn as st
+import scanpy as sc
 
 from script.gene_plot import make_gene_plot
 from script.cluster_plot import make_cluster_plot
@@ -21,7 +22,7 @@ header_step2 = Div(text="""<h2>Step 2: Preprocessing </h2>""",
 width=400, height=50)
 
 # Setup input
-file_input = TextInput(value="../UQ/10X/BCBA", title="10X Visium folder path (default):")
+file_input = TextInput(value="/home/d.pham/10X/BCBA", title="10X Visium folder path (default):")
 
 
 h5_input = TextInput(value="filtered_feature_bc_matrix.h5", title="Count matrix .h5 file path (optional):")
@@ -120,16 +121,16 @@ def change_click():
 def change_preprocessing():
 
     if 0 in preprocessing.active:
-        st.pp.filter_genes(data,min_cells=3)
+        sc.pp.filter_genes(data,min_cells=3)
         print("Filter genes!")
     if 1 in preprocessing.active:
-        st.pp.normalize_total(data)
+        sc.pp.normalize_total(data)
         print("Normalized genes!")
     if 2 in preprocessing.active:
-        st.pp.log1p(data)
+        sc.pp.log1p(data)
         print("Log transformed genes!")
     if 3 in preprocessing.active:
-        st.pp.scale(data)
+        sc.pp.scale(data)
         print("Scaled genes!")
 
     if len(tab_list) == 1:

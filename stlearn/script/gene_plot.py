@@ -107,8 +107,8 @@ def make_gene_plot(data):
         fig.add_layout(color_bar, "right")
 
         fig.toolbar.logo = None
-        fig.xaxis.visible = None
-        fig.yaxis.visible = None
+        fig.xaxis.visible = False
+        fig.yaxis.visible = False
         fig.xgrid.grid_line_color = None
         fig.ygrid.grid_line_color = None
         fig.outline_line_alpha = 0
