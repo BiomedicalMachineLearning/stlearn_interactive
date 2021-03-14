@@ -1,0 +1,42 @@
+
+{% extends 'base.html' %}
+        
+{% block content %}
+
+<div class="frame">
+	<form action = "http://localhost:5000/uploader" method = "POST" enctype = "multipart/form-data" class = "center">
+		<div class="title">
+			<h1>Open Visium data</h1>
+		</div>
+
+		<div class="dropzone">
+			<img src="http://100dayscss.com/codepen/upload.svg" class="upload-icon" />
+			<input type="file" webkitdirectory mozdirectory name = "file" class="upload-input" id="customFile" />
+		</div>
+
+		<button type="submit" class="btn" name="uploadbutton" onclick="$('#loading').show();">Upload file</button>
+
+	</form>
+	<div id="loading" style="display:none;"><img src="{{ url_for('static', filename='img/loading_gif.gif') }}" alt=""/></div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+	$(document).ready(function() {
+    $('#file').bind("click",function() 
+    { if(!$('#customFile').val()){
+                alert("empty");
+                return false;} });  });
+</script>
+<script>
+    $(document).ready(function(){
+        $('input[type="file"]').change(function(e){
+            var fileName = e.target.files[0].webkitRelativePath;
+            var res = fileName.split("/")[0]
+
+            alert('The Visium folder "' + res +  '" has been selected.');
+        });
+    });
+</script>
+{% endblock %}
