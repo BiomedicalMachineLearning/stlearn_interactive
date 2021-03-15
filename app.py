@@ -72,7 +72,7 @@ def uploader_file():
     global adata
     adata = stlearn.Read10X(app.config['UPLOAD_FOLDER'])
 
-    return redirect(url_for('index'))
+    return redirect(url_for('index')) 
 
 @app.route('/gene_plot')
 def gene_plot():
@@ -81,35 +81,37 @@ def gene_plot():
         relative_urls=False)
 
 
-# from stlearn.plotting.classes_bokeh import BokehGenePlot
+
 # adata = stlearn.Read10X("../UQ/10X/BCBA")
 
 
-# def modify_doc(doc):
-#     gp_object = BokehGenePlot(adata)
-#     doc.add_root(row(gp_object.layout, width=800))
+def modify_doc(doc):
+    from stlearn.plotting.classes_bokeh import BokehGenePlot
+    gp_object = BokehGenePlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
                    
-#     gp_object.data_alpha.on_change("value", gp_object.update_data)
-#     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-#     gp_object.spot_size.on_change("value", gp_object.update_data)  
-#     gp_object.gene_select.on_change("value", gp_object.update_data)
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)  
+    gp_object.gene_select.on_change("value", gp_object.update_data)
 
 
-# bkapp = Application(FunctionHandler(modify_doc))
+bkapp = Application(FunctionHandler(modify_doc))
+bkapp2 = Application(FunctionHandler(modify_doc))
+
+
+def bk_worker():
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
+    server = Server({'/bokeh_gene_plot': bkapp,
+                    '/bokeh_cluster_plot': bkapp2}, io_loop=IOLoop(), allow_websocket_origin=["localhost:5000"])
+    server.start()
+    server.io_loop.start()
 
 
 
-# def bk_worker():
-#     asyncio.set_event_loop(asyncio.new_event_loop())
-
-#     server = Server({'/bokeh_gene_plot': bkapp}, io_loop=IOLoop(), allow_websocket_origin=["localhost:5000"])
-#     server.start()
-#     server.io_loop.start()
-
-
-
-# from threading import Thread
-#Thread(target=bk_worker).start()
+from threading import Thread
+Thread(target=bk_worker).start()
 
 if __name__ == '__main__':
    app.run(debug = True)
