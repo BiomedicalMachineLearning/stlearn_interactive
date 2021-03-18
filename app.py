@@ -52,6 +52,7 @@ def uploader_file():
         import shutil
         shutil.rmtree(app.config['UPLOAD_FOLDER'])
         os.makedirs(app.config['UPLOAD_FOLDER'])
+        os.mknod(app.config['UPLOAD_FOLDER'] + "/.gitkeep")
 
         # Get list of files from selected folder
         files = request.files.getlist("file")
@@ -80,12 +81,32 @@ def gene_plot():
     return render_template('gene_plot.html', script=script, template="Flask", 
         relative_urls=False)
 
+@app.route('/cluster_plot')
+def cluster_plot():
+    script = server_document('http://localhost:5006/bokeh_cluster_plot')
+    return render_template('cluster_plot.html', script=script, template="Flask", 
+        relative_urls=False)
 
+import stlearn as st
+import scanpy as sc
+adata = st.Read10X("/home/d.pham/10X/BCBA/")
+adata.raw = adata
+sc.pp.filter_genes(adata,min_cells=3)
+sc.pp.normalize_total(adata)
+sc.pp.log1p(adata)
+sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+adata = adata[:, adata.var.highly_variable]
 
-# adata = stlearn.Read10X("../UQ/10X/BCBA")
+sc.pp.scale(adata)
+sc.pp.pca(adata)
+sc.pp.neighbors(adata)
+sc.tl.leiden(adata,resolution=0.6)
+adata.uns["iroot"] = 3733
+st.spatial.trajectory.pseudotime(adata,eps=100,use_rep="X_pca",use_sme=False,use_label="leiden")
+st.spatial.trajectory.pseudotimespace_global(adata,use_label="leiden",list_cluster=[6,7])
+st.pl.cluster_plot(adata,use_label="leiden",show_plot=False)
 
-
-def modify_doc(doc):
+def modify_doc_gene_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehGenePlot
     gp_object = BokehGenePlot(adata)
     doc.add_root(row(gp_object.layout, width=800))
@@ -95,16 +116,30 @@ def modify_doc(doc):
     gp_object.spot_size.on_change("value", gp_object.update_data)  
     gp_object.gene_select.on_change("value", gp_object.update_data)
 
+def modify_doc_cluster_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehClusterPlot
+    gp_object = BokehClusterPlot(adata,use_label="leiden")
+    doc.add_root(row(gp_object.layout, width=800))
+                   
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data) 
+    gp_object.list_cluster.on_change("active", gp_object.update_data)
+    gp_object.checkbox_group.on_change("active", gp_object.update_data)
 
-bkapp = Application(FunctionHandler(modify_doc))
-bkapp2 = Application(FunctionHandler(modify_doc))
+
+# App for gene_plot
+bkapp = Application(FunctionHandler(modify_doc_gene_plot))
+
+# App for cluster_plot
+bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 
 
 def bk_worker():
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    server = Server({'/bokeh_gene_plot': bkapp,
-                    '/bokeh_cluster_plot': bkapp2}, io_loop=IOLoop(), allow_websocket_origin=["localhost:5000"])
+    server = Server({'/bokeh_gene_plot':bkapp,
+                    '/bokeh_cluster_plot': bkapp2}, io_loop=IOLoop(), allow_websocket_origin=["127.0.0.1:5000"])
     server.start()
     server.io_loop.start()
 
