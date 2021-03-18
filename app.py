@@ -87,24 +87,24 @@ def cluster_plot():
     return render_template('cluster_plot.html', script=script, template="Flask", 
         relative_urls=False)
 
-import stlearn as st
-import scanpy as sc
-adata = st.Read10X("/home/d.pham/10X/BCBA/")
-adata.raw = adata
-sc.pp.filter_genes(adata,min_cells=3)
-sc.pp.normalize_total(adata)
-sc.pp.log1p(adata)
-sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
-adata = adata[:, adata.var.highly_variable]
+# import stlearn as st
+# import scanpy as sc
+# adata = st.Read10X("/home/d.pham/10X/BCBA/")
+# adata.raw = adata
+# sc.pp.filter_genes(adata,min_cells=3)
+# sc.pp.normalize_total(adata)
+# sc.pp.log1p(adata)
+# sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+# adata = adata[:, adata.var.highly_variable]
 
-sc.pp.scale(adata)
-sc.pp.pca(adata)
-sc.pp.neighbors(adata)
-sc.tl.leiden(adata,resolution=0.6)
-adata.uns["iroot"] = 3733
-st.spatial.trajectory.pseudotime(adata,eps=100,use_rep="X_pca",use_sme=False,use_label="leiden")
-st.spatial.trajectory.pseudotimespace_global(adata,use_label="leiden",list_cluster=[6,7])
-st.pl.cluster_plot(adata,use_label="leiden",show_plot=False)
+# sc.pp.scale(adata)
+# sc.pp.pca(adata)
+# sc.pp.neighbors(adata)
+# sc.tl.leiden(adata,resolution=0.6)
+# adata.uns["iroot"] = 3733
+# st.spatial.trajectory.pseudotime(adata,eps=100,use_rep="X_pca",use_sme=False,use_label="leiden")
+# st.spatial.trajectory.pseudotimespace_global(adata,use_label="leiden",list_cluster=[6,7])
+# st.pl.cluster_plot(adata,use_label="leiden",show_plot=False)
 
 def modify_doc_gene_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehGenePlot
