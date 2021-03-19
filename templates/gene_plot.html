@@ -1,4 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-  {{ script|safe }}
+<div class="card">
+   <div class="card-header card-header-primary">
+		<h4 class="card-title">Gene plot</h4>
+		<p class="card-category">Interactive version</p>
+   </div>
+   <div class="card-body">
+		{{ script|safe }}
+   </div>            
+</div>
+
+  
 {% endblock %}
