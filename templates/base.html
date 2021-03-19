@@ -1,94 +1,144 @@
- <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="{{ app_description }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+<!doctype html>
+<html lang="en">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-
-    <title>
-      {% block title %}{% endblock %}
-    </title>
-
-
-    {% block resource %}
+<head>
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='/img/favicon.png') }}"/>
+  {% block resource %}
     
-    {% endblock %}
-    <!-- Add to homescreen for Chrome on Android -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" sizes="192x192" href="{{ url_for('static', filename='img/android-desktop.png') }}">
+  {% endblock %}
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-    <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="{{ app_name }}">
-    <link rel="apple-touch-icon-precomposed" href="{{ url_for('static', filename='img/ios-desktop.png') }}">
+  <link href="{{ url_for('static', filename='/css/material-dashboard.min.css') }}" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='/css/style.css') }}" rel="stylesheet" />
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  <!-- Material Kit CSS -->
+  
+</head>
 
-    <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='img/touch/ms-touch-icon-144x144-precomposed.png') }}">
-    <meta name="msapplication-TileColor" content="#3372DF">
+<body>
+  <div class="wrapper ">
+    <div class="sidebar" data-color="purple" data-background-color="white">
+      <!--
+      Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/material.cyan-light_blue.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-  </head>
-  <body>
-
-    <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
-      <div class="demo-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
-        <header class="demo-drawer-header">
-          <img src="{{ url_for('static', filename='img/user.jpg') }}" class="demo-avatar">
-          <div class="demo-avatar-dropdown">
-            <h5 style="margin: auto;">stLearn interactive</h5>
-          </div>
-        </header>
-        <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-800">
-          <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">home</i>Home</a>
-          <div><p class="mdl-color--blue-grey-50">Processors</p></div>
-          <a class="mdl-navigation__link" href="/upload"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">upload</i>Open data</a>
-          <a class="navtit mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">fact_check</i>Preprocessing</a>
-          <div><p class="mdl-color--blue-grey-50">Visualization</p></div>
-          <a class="mdl-navigation__link" href="/gene_plot"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">analytics</i>Gene plot</a>
-          <a class="mdl-navigation__link" href="/cluster_plot"><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">analytics</i>Cluster plot</a>
-
-          <div class="mdl-layout-spacer"></div>
-          <a class="mdl-navigation__link" href=""><i class="mdl-color-text--blue-grey-400 material-icons" role="presentation">help_outline</i><span class="visuallyhidden">Help</span></a>
-        </nav>
+      Tip 2: you can also add an image using data-image tag
+  -->
+      <div class="logo">
+        <a href="/" class="simple-text logo-mini">
+          stLearn
+        </a>
       </div>
-      <main class="mdl-layout__content mdl-color--grey-100">
-        {% block content %}
+      <div class="sidebar-wrapper">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">
+              <i class="material-icons">home</i>
+              <p>Homepage</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/upload">
+              <i class="material-icons">drive_folder_upload</i>
+              <p>Upload files</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="/preprocessing">
+              <i class="material-icons">settings_suggest</i>
+              <p>Preprocessing</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="/cci">
+              <i class="material-icons">cable</i>
+              <p>Cell-cell interaction</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/clustering">
+              <i class="material-icons">grid_4x4</i>
+              <p>SME clustering</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="/psts">
+              <i class="material-icons">air</i>
+              <p>PSTS analysis</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/gene_plot">
+              <i class="material-icons">lens_blur</i>
+              <p>Gene plot</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/cluster_plot">
+              <i class="material-icons">analytics</i>
+              <p>Cluster plot</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/cci_plot">
+              <i class="material-icons">calendar_view_month</i>
+              <p>Cci plot</p>
+            </a>
+          </li>
+          <!-- your sidebar here -->
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <div class="content">
+        <div class="container-fluid">
+          {% block content %}
         {% endblock %}
 
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul class=flashes>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
+        
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="container-fluid">
+          <nav class="float-left">
+            <ul>
+              <li>
+                <a href="https://github.com/BiomedicalMachineLearning/stLearn">
+                  Genomics and Machine Learning Lab
+                </a>
+              </li>
             </ul>
-          {% endif %}
-        {% endwith %}
+          </nav>
+          <div class="copyright float-right">
+            &copy;
+            <script>
+              document.write(new Date().getFullYear())
+            </script>
 
-      </main>
+          </div>
+          <!-- your footer here -->
+        </div>
+      </footer>
     </div>
-    <script src="{{ url_for('static', filename='js/material.min.js') }}">
-      var inps = document.querySelectorAll('input');
-      [].forEach.call(inps, function(inp) {
-        inp.onchange = function(e) {
-          console.log(this.files);
-        };
-      })
+  </div>
+<!--   Core JS Files   -->
+  <script src="{{ url_for('static', filename='/js/core/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/core/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/core/bootstrap-material-design.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
+<script>
+    $('a[href="' + this.location.pathname + '"]').parents('li,ul').addClass('active');
+</script>
+   
 
-    </script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    {% block javascript %}
+
+  {% block javascript %}
     {% endblock %}
+</body>
 
-
-  </body>
 </html>

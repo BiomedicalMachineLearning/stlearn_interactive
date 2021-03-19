@@ -37,6 +37,23 @@ def index():
 def upload():
     return render_template('upload.html')
 
+@app.route('/preprocessing')
+def preprocessing():
+    return render_template('preprocessing.html')
+
+@app.route('/clustering')
+def clustering():
+    return render_template('clustering.html')
+
+@app.route('/cci')
+def cci():
+    return render_template('cci.html')
+
+@app.route('/psts')
+def psts():
+    return render_template('psts.html')
+
+
 allow_files = [
     "filtered_feature_bc_matrix.h5",
     "tissue_hires_image.png",
@@ -73,23 +90,29 @@ def uploader_file():
     global adata
     adata = stlearn.Read10X(app.config['UPLOAD_FOLDER'])
 
-    return redirect(url_for('index')) 
+    return redirect(url_for('upload')) 
 
 @app.route('/gene_plot')
 def gene_plot():
-    script = server_document('http://localhost:5006/bokeh_gene_plot')
+    script = server_document('http://127.0.0.1:5006/bokeh_gene_plot')
     return render_template('gene_plot.html', script=script, template="Flask", 
         relative_urls=False)
 
 @app.route('/cluster_plot')
 def cluster_plot():
-    script = server_document('http://localhost:5006/bokeh_cluster_plot')
+    script = server_document('http://127.0.0.1:5006/bokeh_cluster_plot')
     return render_template('cluster_plot.html', script=script, template="Flask", 
         relative_urls=False)
 
-# import stlearn as st
-# import scanpy as sc
-# adata = st.Read10X("/home/d.pham/10X/BCBA/")
+@app.route('/cci_plot')
+def cci_plot():
+    script = server_document('http://127.0.0.1:5006/bokeh_cci_plot')
+    return render_template('cci_plot.html', script=script, template="Flask", 
+        relative_urls=False)
+
+import stlearn as st
+import scanpy as sc
+adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
 # sc.pp.normalize_total(adata)
@@ -98,6 +121,11 @@ def cluster_plot():
 # adata = adata[:, adata.var.highly_variable]
 
 # sc.pp.scale(adata)
+
+# adata.uns["lr"] = ['Gfap_Ctss']
+# st.tl.cci.lr(adata=adata)
+# st.tl.cci.permutation(adata,n_pairs=1)
+
 # sc.pp.pca(adata)
 # sc.pp.neighbors(adata)
 # sc.tl.leiden(adata,resolution=0.6)
@@ -127,6 +155,15 @@ def modify_doc_cluster_plot(doc):
     gp_object.list_cluster.on_change("active", gp_object.update_data)
     gp_object.checkbox_group.on_change("active", gp_object.update_data)
 
+def modify_doc_cci_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehCciPlot
+    gp_object = BokehCciPlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
+                   
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)  
+    gp_object.het_select.on_change("value", gp_object.update_data)
 
 # App for gene_plot
 bkapp = Application(FunctionHandler(modify_doc_gene_plot))
@@ -134,12 +171,15 @@ bkapp = Application(FunctionHandler(modify_doc_gene_plot))
 # App for cluster_plot
 bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 
+# App for cluster_plot
+bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
 
 def bk_worker():
     asyncio.set_event_loop(asyncio.new_event_loop())
 
     server = Server({'/bokeh_gene_plot':bkapp,
-                    '/bokeh_cluster_plot': bkapp2}, io_loop=IOLoop(), allow_websocket_origin=["127.0.0.1:5000"])
+                    '/bokeh_cluster_plot': bkapp2,
+                    '/bokeh_cci_plot': bkapp3}, io_loop=IOLoop(), allow_websocket_origin=["127.0.0.1:5000","localhost:5000"])
     server.start()
     server.io_loop.start()
 
@@ -149,4 +189,4 @@ from threading import Thread
 Thread(target=bk_worker).start()
 
 if __name__ == '__main__':
-   app.run(debug = True)
+   app.run(host = '0.0.0.0',port=5005, debug = True)
