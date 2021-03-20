@@ -89,8 +89,6 @@ def make_paga_plot(data, use_label):
     data.uns["iroot"] = np.flatnonzero(data.obs[use_label] == str(0))[0]
     st.spatial.trajectory.pseudotime(data, eps=100, use_rep="X_pca")
 
-    
-
     scanpy.pl.paga(
         data,
         color=use_label,

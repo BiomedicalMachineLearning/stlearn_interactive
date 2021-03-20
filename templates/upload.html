@@ -1,6 +1,6 @@
 
 {% extends 'base.html' %}
-        
+
 {% block content %}
 
 <div class="card">
@@ -25,7 +25,7 @@
 </div>
 
 
-   </div> 
+   </div>
    <div class="card-footer">
 
 
@@ -38,7 +38,7 @@
 	    </ul>
 	  {% endif %}
 	{% endwith %}
-	   </div>           
+	   </div>
 </div>
 
 {% endblock %}
@@ -52,11 +52,9 @@
 {% block javascript %}
 <script type="text/javascript">
 	$(document).ready(function() {
-    $('#file').bind("click",function() 
+    $('#file').bind("click",function()
     { if(!$('#customFile').val()){
                 alert("empty");
                 return false;} });  });
 </script>
 {% endblock %}
-
-
