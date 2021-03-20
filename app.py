@@ -22,36 +22,39 @@ from bokeh.layouts import column, row
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-UPLOAD_FOLDER = 'uploads/'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER 
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+UPLOAD_FOLDER = "uploads/"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 
-
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["GET"])
 def index():
-    return render_template('index.html')
-    
+    return render_template("index.html")
 
-@app.route('/upload')
+
+@app.route("/upload")
 def upload():
-    return render_template('upload.html')
+    return render_template("upload.html")
 
-@app.route('/preprocessing')
+
+@app.route("/preprocessing")
 def preprocessing():
-    return render_template('preprocessing.html')
+    return render_template("preprocessing.html")
 
-@app.route('/clustering')
+
+@app.route("/clustering")
 def clustering():
-    return render_template('clustering.html')
+    return render_template("clustering.html")
 
-@app.route('/cci')
+
+@app.route("/cci")
 def cci():
-    return render_template('cci.html')
+    return render_template("cci.html")
 
-@app.route('/psts')
+
+@app.route("/psts")
 def psts():
-    return render_template('psts.html')
+    return render_template("psts.html")
 
 
 allow_files = [
@@ -59,59 +62,79 @@ allow_files = [
     "tissue_hires_image.png",
     "tissue_lowres_image.png",
     "tissue_positions_list.csv",
-    "scalefactors_json.json"
+    "scalefactors_json.json",
 ]
 
-@app.route('/uploader', methods = ['GET', 'POST'])
+
+@app.route("/uploader", methods=["GET", "POST"])
 def uploader_file():
-    if request.method == 'POST':
+    if request.method == "POST":
         # Clean uploads folder before upload a new data
         import shutil
-        shutil.rmtree(app.config['UPLOAD_FOLDER'])
-        os.makedirs(app.config['UPLOAD_FOLDER'])
-        os.mknod(app.config['UPLOAD_FOLDER'] + "/.gitkeep")
+
+        shutil.rmtree(app.config["UPLOAD_FOLDER"])
+        os.makedirs(app.config["UPLOAD_FOLDER"])
+        os.mknod(app.config["UPLOAD_FOLDER"] + "/.gitkeep")
 
         # Get list of files from selected folder
         files = request.files.getlist("file")
-        os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], "spatial"))
+        os.mkdir(os.path.join(app.config["UPLOAD_FOLDER"], "spatial"))
         for file in files:
             filename = secure_filename(file.filename)
             if allow_files[0] in filename:
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                os.rename(os.path.join(app.config['UPLOAD_FOLDER'], filename), 
-                    os.path.join(app.config['UPLOAD_FOLDER'], allow_files[0]))
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                os.rename(
+                    os.path.join(app.config["UPLOAD_FOLDER"], filename),
+                    os.path.join(app.config["UPLOAD_FOLDER"], allow_files[0]),
+                )
             for allow_file in allow_files[1:]:
                 if allow_file in filename:
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'] + "/spatial", filename))
-                    os.rename(os.path.join(app.config['UPLOAD_FOLDER'] + "/spatial", filename), 
-                        os.path.join(app.config['UPLOAD_FOLDER'] + "/spatial", allow_file))
+                    file.save(
+                        os.path.join(app.config["UPLOAD_FOLDER"] + "/spatial", filename)
+                    )
+                    os.rename(
+                        os.path.join(
+                            app.config["UPLOAD_FOLDER"] + "/spatial", filename
+                        ),
+                        os.path.join(
+                            app.config["UPLOAD_FOLDER"] + "/spatial", allow_file
+                        ),
+                    )
 
-    flash('File uploaded successfully')
+    flash("File uploaded successfully")
     global adata
-    adata = stlearn.Read10X(app.config['UPLOAD_FOLDER'])
+    adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
 
-    return redirect(url_for('upload')) 
+    return redirect(url_for("upload"))
 
-@app.route('/gene_plot')
+
+@app.route("/gene_plot")
 def gene_plot():
-    script = server_document('http://127.0.0.1:5006/bokeh_gene_plot')
-    return render_template('gene_plot.html', script=script, template="Flask", 
-        relative_urls=False)
+    script = server_document("http://127.0.0.1:5006/bokeh_gene_plot")
+    return render_template(
+        "gene_plot.html", script=script, template="Flask", relative_urls=False
+    )
 
-@app.route('/cluster_plot')
+
+@app.route("/cluster_plot")
 def cluster_plot():
-    script = server_document('http://127.0.0.1:5006/bokeh_cluster_plot')
-    return render_template('cluster_plot.html', script=script, template="Flask", 
-        relative_urls=False)
+    script = server_document("http://127.0.0.1:5006/bokeh_cluster_plot")
+    return render_template(
+        "cluster_plot.html", script=script, template="Flask", relative_urls=False
+    )
 
-@app.route('/cci_plot')
+
+@app.route("/cci_plot")
 def cci_plot():
-    script = server_document('http://127.0.0.1:5006/bokeh_cci_plot')
-    return render_template('cci_plot.html', script=script, template="Flask", 
-        relative_urls=False)
+    script = server_document("http://127.0.0.1:5006/bokeh_cci_plot")
+    return render_template(
+        "cci_plot.html", script=script, template="Flask", relative_urls=False
+    )
+
 
 import stlearn as st
 import scanpy as sc
+
 adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
@@ -134,36 +157,43 @@ adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # st.spatial.trajectory.pseudotimespace_global(adata,use_label="leiden",list_cluster=[6,7])
 # st.pl.cluster_plot(adata,use_label="leiden",show_plot=False)
 
+
 def modify_doc_gene_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehGenePlot
+
     gp_object = BokehGenePlot(adata)
     doc.add_root(row(gp_object.layout, width=800))
-                   
+
     gp_object.data_alpha.on_change("value", gp_object.update_data)
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-    gp_object.spot_size.on_change("value", gp_object.update_data)  
+    gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.gene_select.on_change("value", gp_object.update_data)
+
 
 def modify_doc_cluster_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehClusterPlot
-    gp_object = BokehClusterPlot(adata,use_label="leiden")
+
+    gp_object = BokehClusterPlot(adata, use_label="leiden")
     doc.add_root(row(gp_object.layout, width=800))
-                   
+
     gp_object.data_alpha.on_change("value", gp_object.update_data)
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-    gp_object.spot_size.on_change("value", gp_object.update_data) 
+    gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.list_cluster.on_change("active", gp_object.update_data)
     gp_object.checkbox_group.on_change("active", gp_object.update_data)
 
+
 def modify_doc_cci_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehCciPlot
+
     gp_object = BokehCciPlot(adata)
     doc.add_root(row(gp_object.layout, width=800))
-                   
+
     gp_object.data_alpha.on_change("value", gp_object.update_data)
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-    gp_object.spot_size.on_change("value", gp_object.update_data)  
+    gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.het_select.on_change("value", gp_object.update_data)
+
 
 # App for gene_plot
 bkapp = Application(FunctionHandler(modify_doc_gene_plot))
@@ -174,19 +204,26 @@ bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 # App for cluster_plot
 bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
 
+
 def bk_worker():
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    server = Server({'/bokeh_gene_plot':bkapp,
-                    '/bokeh_cluster_plot': bkapp2,
-                    '/bokeh_cci_plot': bkapp3}, io_loop=IOLoop(), allow_websocket_origin=["127.0.0.1:5000","localhost:5000"])
+    server = Server(
+        {
+            "/bokeh_gene_plot": bkapp,
+            "/bokeh_cluster_plot": bkapp2,
+            "/bokeh_cci_plot": bkapp3,
+        },
+        io_loop=IOLoop(),
+        allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
+    )
     server.start()
     server.io_loop.start()
 
 
-
 from threading import Thread
+
 Thread(target=bk_worker).start()
 
-if __name__ == '__main__':
-   app.run(host = '0.0.0.0',port=5005, debug = True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5005, debug=True)

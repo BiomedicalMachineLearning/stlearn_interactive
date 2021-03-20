@@ -56,7 +56,7 @@ def make_ptvis_plot(data):
             del data.obsm["X_draw_graph_fr"]
         except:
             pass
-        st.pl.cluster_plot(data,use_label="louvain",show_plot=False)
+        st.pl.cluster_plot(data, use_label="louvain", show_plot=False)
         data.uns["iroot"] = np.flatnonzero(data.obs["louvain"] == str(root))[spot_index]
         st.spatial.trajectory.pseudotime(data, eps=eps, use_rep="X_pca")
 
@@ -137,9 +137,7 @@ def make_ptvis_plot(data):
     def create_figures(data, cluster, reverse, tissue_alpha, data_alpha):
         fig, a = plt.subplots()
 
-        st.spatial.trajectory.local_level(
-            data, use_label="louvain", cluster=cluster
-        )
+        st.spatial.trajectory.local_level(data, use_label="louvain", cluster=cluster)
 
         # if len(pst_layout.children) == 8:
         #    del pst_layout.children[7]
@@ -245,7 +243,11 @@ def make_ptvis_plot(data):
         )
 
         st.pl.trajectory.tree_plot(
-            data, dpi=150, output="stlearn/static/", name="tmp" + str(id_img2),show_plot=False
+            data,
+            dpi=150,
+            output="stlearn/static/",
+            name="tmp" + str(id_img2),
+            show_plot=False,
         )
 
         fig = Div(
@@ -406,7 +408,6 @@ def make_ptvis_plot(data):
         sizing_mode="fixed",
     )
     # list_cluster_pstg.on_change('value',change_pstg)
-
 
     data_alpha_pstg = Slider(
         title="Spot alpha", value=1.0, start=0, end=1.0, step=0.1, sizing_mode="fixed"

@@ -5,7 +5,7 @@
   <title>{% block title %}{% endblock %}</title>
   <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='/img/favicon.png') }}"/>
   {% block resource %}
-    
+
   {% endblock %}
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <!-- Material Kit CSS -->
-  
+
 </head>
 
 <body>
@@ -100,7 +100,7 @@
           {% block content %}
         {% endblock %}
 
-        
+
         </div>
       </div>
       <footer class="footer">
@@ -134,7 +134,7 @@
 <script>
     $('a[href="' + this.location.pathname + '"]').parents('li,ul').addClass('active');
 </script>
-   
+
 
 
   {% block javascript %}
