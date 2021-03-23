@@ -74,7 +74,8 @@ def uploader_file():
 
         shutil.rmtree(app.config["UPLOAD_FOLDER"])
         os.makedirs(app.config["UPLOAD_FOLDER"])
-        os.mknod(app.config["UPLOAD_FOLDER"] + "/.gitkeep")
+        open(app.config["UPLOAD_FOLDER"] + "/.gitkeep", 'a').close()
+        #os.mknod()
 
         # Get list of files from selected folder
         files = request.files.getlist("file")
@@ -135,7 +136,7 @@ def cci_plot():
 import stlearn as st
 import scanpy as sc
 
-adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
+# adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
 # sc.pp.normalize_total(adata)
