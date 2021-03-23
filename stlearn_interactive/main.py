@@ -368,7 +368,7 @@ tab_list = [tab1]
 tabs = Tabs(tabs=tab_list)
 
 curdoc().add_root(tabs)
-curdoc().title = "stlearn"
+curdoc().title = "stlearn_interactive"
 
 
 def get_cluster_color(data, use_label="louvain", cmap="vega_20_scanpy"):

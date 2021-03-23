@@ -4,7 +4,7 @@ from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from werkzeug.utils import secure_filename
 
-import os
+import os, sys
 import stlearn
 
 import asyncio
@@ -19,13 +19,28 @@ from bokeh.embed import server_document
 
 from bokeh.layouts import column, row
 
+""" Functions related to processing the forms.
+"""
+from source.forms import views # for changing data in response to input
+
+""" Global variables.
+"""
+global adata # Storing the data
+adata = None
+global step_log # Keeps track of what step we're up to (performed preprocessing?)
+step_log = {'preprocessed_params': {},
+            'preprocessed': False}
+
+print(stlearn, file=sys.stdout)
+
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 UPLOAD_FOLDER = "uploads/"
+TEMPLATES_AUTO_RELOAD = True
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-
+app.config["TEMPLATES_AUTO_RELOAD"] = TEMPLATES_AUTO_RELOAD
 
 @app.route("/", methods=["GET"])
 def index():
@@ -36,11 +51,11 @@ def index():
 def upload():
     return render_template("upload.html")
 
-
-@app.route("/preprocessing")
+@app.route("/preprocessing", methods=["GET", "POST"])
 def preprocessing():
-    return render_template("preprocessing.html")
-
+    global adata, step_log
+    updated_page = views.run_preprocessing(request, adata, step_log)
+    return updated_page
 
 @app.route("/clustering")
 def clustering():
@@ -108,7 +123,6 @@ def uploader_file():
 
     return redirect(url_for("upload"))
 
-
 @app.route("/gene_plot")
 def gene_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_gene_plot")
@@ -116,14 +130,12 @@ def gene_plot():
         "gene_plot.html", script=script, template="Flask", relative_urls=False
     )
 
-
 @app.route("/cluster_plot")
 def cluster_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_cluster_plot")
     return render_template(
         "cluster_plot.html", script=script, template="Flask", relative_urls=False
     )
-
 
 @app.route("/cci_plot")
 def cci_plot():
@@ -202,7 +214,7 @@ bkapp = Application(FunctionHandler(modify_doc_gene_plot))
 # App for cluster_plot
 bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 
-# App for cluster_plot
+# App for cci_plot
 bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
 
 
