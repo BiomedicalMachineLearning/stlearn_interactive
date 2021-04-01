@@ -22,7 +22,20 @@
 </head>
 
 <body>
+
+  
+
   <div class="wrapper ">
+     <!--
+      Status box
+  -->
+    <div class="card right" style="width: 18rem;">
+      <ul class="list-group list-group-flush">
+        {% block status %}
+        {% endblock %}
+      </ul>
+    </div>
+
     <div class="sidebar" data-color="purple" data-background-color="white">
       <!--
       Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
@@ -49,43 +62,43 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" href="/preprocessing">
+            <a class="nav-link disabled" id="preprocessing" href="/preprocessing">
               <i class="material-icons">settings_suggest</i>
               <p>Preprocessing</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" href="/cci">
+            <a class="nav-link disabled" id="cci" href="/cci">
               <i class="material-icons">cable</i>
               <p>Cell-cell interaction</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/clustering">
+            <a class="nav-link disabled" id="clustering" href="/clustering">
               <i class="material-icons">grid_4x4</i>
               <p>SME clustering</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" href="/psts">
+            <a class="nav-link disabled" id="psts" href="/psts">
               <i class="material-icons">air</i>
               <p>PSTS analysis</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/gene_plot">
+            <a class="nav-link disabled" id="gene_plot" href="/gene_plot">
               <i class="material-icons">lens_blur</i>
               <p>Gene plot</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/cluster_plot">
+            <a class="nav-link disabled" id="cluster_plot" href="/cluster_plot">
               <i class="material-icons">analytics</i>
               <p>Cluster plot</p>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/cci_plot">
+            <a class="nav-link disabled" id="cci_plot" href="/cci_plot">
               <i class="material-icons">calendar_view_month</i>
               <p>Cci plot</p>
             </a>
@@ -126,6 +139,10 @@
       </footer>
     </div>
   </div>
+
+  
+
+
 <!--   Core JS Files   -->
   <script src="{{ url_for('static', filename='/js/core/jquery.min.js') }}"></script>
   <script src="{{ url_for('static', filename='/js/core/popper.min.js') }}"></script>
@@ -133,6 +150,26 @@
   <script src="{{ url_for('static', filename='/js/plugins/perfect-scrollbar.jquery.min.js') }}"></script>
 <script>
     $('a[href="' + this.location.pathname + '"]').parents('li,ul').addClass('active');
+
+    {% if step_log.cci[0] %}
+      $( "#cci_plot" ).removeClass( "disabled" )
+    {% endif %}
+
+    {% if step_log.clustering[0] %}
+      $( "#psts" ).removeClass( "disabled" )
+      $( "#cluster_plot" ).removeClass( "disabled" )
+    {% endif %}
+
+    {% if step_log.preprocessed[0] %}
+      $( "#cci" ).removeClass( "disabled" )
+      $( "#clustering" ).removeClass( "disabled" )
+    {% endif %}
+
+    {% if step_log.uploaded[0] %}
+      $( "#preprocessing" ).removeClass( "disabled" )
+      $( "#gene_plot" ).removeClass( "disabled" )
+    {% endif %}
+
 </script>
 
 

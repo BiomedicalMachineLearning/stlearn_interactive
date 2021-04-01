@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, flash, url_for, redirect
+from flask import Flask, render_template, request, flash, url_for, redirect, session
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from werkzeug.utils import secure_filename
 
-import os
+import os, sys
 import stlearn
 
 import asyncio
@@ -19,42 +19,62 @@ from bokeh.embed import server_document
 
 from bokeh.layouts import column, row
 
+""" Functions related to processing the forms.
+"""
+from source.forms import views # for changing data in response to input
+
+""" Global variables.
+"""
+global adata # Storing the data
+adata = None
+global step_log # Keeps track of what step we're up to (performed preprocessing?)
+step_log = {'uploaded': [False,"Upload file"],
+            'preprocessed': [False,"Preprocessing"],
+            'clustering': [False,"Clustering"],
+            'psts': [False,"Spatial trajectory"],
+            'cci': [False,"Cell-cell interaction"],
+            "preprocessed_params": {}}
+
+#print(stlearn, file=sys.stdout)
+
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 UPLOAD_FOLDER = "uploads/"
+TEMPLATES_AUTO_RELOAD = True
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-
+app.config["TEMPLATES_AUTO_RELOAD"] = TEMPLATES_AUTO_RELOAD
+app.config["SESSION_PERMANENT"] = False
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return render_template("index.html", step_log=step_log)
 
 
 @app.route("/upload")
 def upload():
-    return render_template("upload.html")
+    return render_template("upload.html", step_log=step_log)
 
-
-@app.route("/preprocessing")
+@app.route("/preprocessing", methods=["GET", "POST"])
 def preprocessing():
-    return render_template("preprocessing.html")
-
+    global adata, step_log
+    updated_page = views.run_preprocessing(request, adata, step_log)
+    return updated_page
 
 @app.route("/clustering")
 def clustering():
-    return render_template("clustering.html")
+    return render_template("clustering.html", step_log=step_log)
 
 
 @app.route("/cci")
 def cci():
-    return render_template("cci.html")
+    return render_template("cci.html", step_log=step_log)
 
 
 @app.route("/psts")
 def psts():
-    return render_template("psts.html")
+    return render_template("psts.html", step_log=step_log)
 
 
 allow_files = [
@@ -103,35 +123,39 @@ def uploader_file():
                     )
 
     flash("File uploaded successfully")
-    global adata
+    global adata, step_log
     adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
 
-    return redirect(url_for("upload"))
+    step_log["uploaded"][0] = True
 
+    return redirect(url_for("upload"))
 
 @app.route("/gene_plot")
 def gene_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_gene_plot")
     return render_template(
-        "gene_plot.html", script=script, template="Flask", relative_urls=False
+        "gene_plot.html", script=script, template="Flask", relative_urls=False, step_log=step_log
     )
-
 
 @app.route("/cluster_plot")
 def cluster_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_cluster_plot")
     return render_template(
-        "cluster_plot.html", script=script, template="Flask", relative_urls=False
+        "cluster_plot.html", script=script, template="Flask", relative_urls=False, step_log=step_log
     )
-
 
 @app.route("/cci_plot")
 def cci_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_cci_plot")
     return render_template(
-        "cci_plot.html", script=script, template="Flask", relative_urls=False
+        "cci_plot.html", script=script, template="Flask", relative_urls=False, step_log=step_log
     )
 
+@app.route("/reset_session", methods=['POST'])
+def reset_session():
+    #Moving forward code
+    session.clear()
+    return redirect(url_for("index"))
 
 import stlearn as st
 import scanpy as sc
@@ -196,35 +220,35 @@ def modify_doc_cci_plot(doc):
     gp_object.het_select.on_change("value", gp_object.update_data)
 
 
-# App for gene_plot
-bkapp = Application(FunctionHandler(modify_doc_gene_plot))
+# # App for gene_plot
+# bkapp = Application(FunctionHandler(modify_doc_gene_plot))
 
-# App for cluster_plot
-bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
+# # App for cluster_plot
+# bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 
-# App for cluster_plot
-bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
-
-
-def bk_worker():
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
-    server = Server(
-        {
-            "/bokeh_gene_plot": bkapp,
-            "/bokeh_cluster_plot": bkapp2,
-            "/bokeh_cci_plot": bkapp3,
-        },
-        io_loop=IOLoop(),
-        allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
-    )
-    server.start()
-    server.io_loop.start()
+# # App for cci_plot
+# bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
 
 
-from threading import Thread
+# def bk_worker():
+#     asyncio.set_event_loop(asyncio.new_event_loop())
 
-Thread(target=bk_worker).start()
+#     server = Server(
+#         {
+#             "/bokeh_gene_plot": bkapp,
+#             "/bokeh_cluster_plot": bkapp2,
+#             "/bokeh_cci_plot": bkapp3,
+#         },
+#         io_loop=IOLoop(),
+#         allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
+#     )
+#     server.start()
+#     server.io_loop.start()
+
+
+# from threading import Thread
+
+# Thread(target=bk_worker).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5005, debug=True)

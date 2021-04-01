@@ -67,9 +67,9 @@ def make_ptvis_plot(data):
 
         id_img = random.randint(3, 99999999)
 
-        # filelist = [ f for f in os.listdir("stlearn/static/") if f.endswith(".png") ]
+        # filelist = [ f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png") ]
         # for f in filelist:
-        # os.remove(os.path.join("stlearn/static/", f))
+        # os.remove(os.path.join("stlearn_interactive/static/", f))
 
         st.pl.trajectory.pseudotime_plot(
             data,
@@ -82,11 +82,11 @@ def make_ptvis_plot(data):
             node_size=3,
             show_plot=False,
             dpi=150,
-            output="stlearn/static/",
+            output="stlearn_interactive/static/",
             name="tmp" + str(id_img),
         )
         fig = Div(
-            text="<img src='stlearn/static/tmp"
+            text="<img src='stlearn_interactive/static/tmp"
             + str(id_img)
             + ".png' height='482' width='568'>",
             sizing_mode="fixed",
@@ -145,9 +145,9 @@ def make_ptvis_plot(data):
         id_img = random.randint(3, 99999999)
         id_img2 = random.randint(3, 99999999)
 
-        # filelist = [ f for f in os.listdir("stlearn/static/") if f.endswith(".png") ]
+        # filelist = [ f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png") ]
         # for f in filelist:
-        # os.remove(os.path.join("stlearn/static/", f))
+        # os.remove(os.path.join("stlearn_interactive/static/", f))
 
         if reverse == 0:
             reverse_value = True
@@ -161,7 +161,7 @@ def make_ptvis_plot(data):
             tissue_alpha=tissue_alpha,
             data_alpha=data_alpha,
             dpi=150,
-            output="stlearn/static/",
+            output="stlearn_interactive/static/",
             name="tmp" + str(id_img),
             show_plot=False,
         )
@@ -172,20 +172,20 @@ def make_ptvis_plot(data):
             branch_alpha=0.2,
             dpi=150,
             reverse=reverse_value,
-            output="stlearn/static/",
+            output="stlearn_interactive/static/",
             name="tmp" + str(id_img2),
             show_plot=False,
         )
 
         fig = Div(
-            text="<img src='stlearn/static/tmp"
+            text="<img src='stlearn_interactive/static/tmp"
             + str(id_img)
             + ".png' height='554' width='554' style='float: left;'>",
             sizing_mode="fixed",
         )
 
         fig2 = Div(
-            text="<img src='stlearn/static/tmp"
+            text="<img src='stlearn_interactive/static/tmp"
             + str(id_img2)
             + ".png' height='577' width='600' style='padding-left: 300px;'>",
             sizing_mode="fixed",
@@ -219,9 +219,9 @@ def make_ptvis_plot(data):
         id_img = random.randint(3, 99999999)
         id_img2 = random.randint(3, 99999999)
 
-        filelist = [f for f in os.listdir("stlearn/static/") if f.endswith(".png")]
+        filelist = [f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png")]
         for f in filelist:
-            os.remove(os.path.join("stlearn/static/", f))
+            os.remove(os.path.join("stlearn_interactive/static/", f))
 
         st.spatial.trajectory.pseudotimespace_global(
             data, use_label="louvain", list_cluster=list_cluster
@@ -236,7 +236,7 @@ def make_ptvis_plot(data):
             show_subcluster=True,
             show_legend=False,
             dpi=150,
-            output="stlearn/static/",
+            output="stlearn_interactive/static/",
             name="tmp" + str(id_img),
             data_alpha=data_alpha,
             tissue_alpha=tissue_alpha,
@@ -245,20 +245,20 @@ def make_ptvis_plot(data):
         st.pl.trajectory.tree_plot(
             data,
             dpi=150,
-            output="stlearn/static/",
+            output="stlearn_interactive/static/",
             name="tmp" + str(id_img2),
             show_plot=False,
         )
 
         fig = Div(
-            text="<img src='stlearn/static/tmp"
+            text="<img src='stlearn_interactive/static/tmp"
             + str(id_img)
             + ".png' height='500' width='500' style='float: left;'>",
             sizing_mode="fixed",
         )
 
         fig2 = Div(
-            text="<img src='stlearn/static/tmp"
+            text="<img src='stlearn_interactive/static/tmp"
             + str(id_img2)
             + ".png' height='472' width='1200' style='padding-left: 300px;'>",
             sizing_mode="fixed",

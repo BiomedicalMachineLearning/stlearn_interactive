@@ -5,3 +5,42 @@
     margin-right: auto;
     margin-left: auto;
 }
+
+.right {
+  float: right;
+  width: 300px;
+  border: 3px solid #73AD21;
+  padding: 10px;
+}
+
+.card {
+    border: 0;
+    margin-bottom: 30px;
+    margin-top: 10px;
+    border-radius: 6px;
+    color: #333;
+    background: #fff;
+    width: 100%;
+    box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 20%), 0 1px 5px 0 rgb(0 0 0 / 12%);
+}
+
+.main-panel>.content {
+    margin-top: 0px;
+    padding: 30px 15px;
+    min-height: calc(100vh - 123px);
+}
+
+a.disabled, fieldset:disabled a {
+    pointer-events: none;
+    background-color: #D8D8D8;
+}
+
+
+.list-group-item {
+    position: relative;
+    display: block;
+    padding: 0.25rem 1.25rem;
+    margin-bottom: 0;
+    background-color: inherit;
+    border: 0 solid rgba(0,0,0,.125);
+}
