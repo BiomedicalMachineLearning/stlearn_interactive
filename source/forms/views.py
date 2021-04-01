@@ -61,15 +61,16 @@ def run_preprocessing(request, adata, step_log):
 			sc.pp.scale(adata, max_value=10)
 
 		# Setting pre-process to true #
-		step_log['preprocessed'] = True
+		step_log['preprocessed'][0] = True
 
-	if step_log['preprocessed']:
+	if step_log['preprocessed'][0]:
 		flash("Preprocessing completed!")
 
 	updated_page = render_template("superform.html",
 								   title="Preprocessing",
 									superForm=form,
-								   preprocessed=True,#step_log['preprocessed']
+								   preprocessed=True,
+								   step_log=step_log
 									)
 
 	return updated_page
