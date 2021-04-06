@@ -29,7 +29,7 @@ Run the stlearn app:
 
 ``` cd stlearn_interactive ```
 
-``` bokeh serve --show stlearn ```
+``` bokeh serve --show stlearn_interactive ```
 
 # Tutorial:
 
