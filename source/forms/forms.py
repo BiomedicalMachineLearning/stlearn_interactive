@@ -6,11 +6,12 @@
 
 import sys
 from flask_wtf import FlaskForm
-from wtforms import SelectMultipleField, SelectField, StringField, \
-					IntegerField, BooleanField
+#from flask_wtf.file import FileField
+from wtforms import SelectMultipleField, SelectField
+import wtforms
 
 def createSuperForm(elements, element_fields, element_values,
-					validators):
+					validators=None):
 	""" Creates a general form; goal is to create a fully programmable form \
 	that essentially governs all the options the user will select.
 
@@ -57,22 +58,12 @@ def createSuperForm(elements, element_fields, element_values,
 		""" A base form on which all of the fields will be added.
 		"""
 
-		def validate(self):
-			# Return True if no validators attached #
-			if type(self.validators) == type(None):
-				return True
-
-			# Only return True if all the validators return true #
-			for function in self.validators:
-				if not function(self):
-					return False
-
-			return True
+	if type(validators) == type(None):
+		validators = [None] * len(elements)
 
 	# Add the information #
 	SuperForm.elements = elements
 	SuperForm.element_fields = element_fields
-	SuperForm.validators = validators
 
 	multiSelectLeft = True # Places multi-select field to left, alternatives
 							# if many multi-selects in row
@@ -98,24 +89,20 @@ def createSuperForm(elements, element_fields, element_values,
 
 			elif fieldName == 'SelectField':
 				setattr(SuperForm, element,
-						SelectField(element, choices=element_values[i]))
+						SelectField(element, choices=element_values[i],
+									validators=validators[i]))
 
-			elif fieldName == 'StringField':
-				setattr(SuperForm, element,
-						StringField(element))
+			# elif fieldName == 'FileField':
+			# 	setattr(SuperForm, element, FileField(validators=validators[i]))
+			# 	setattr(SuperForm, element + '_placeholder',  # Setting default
+			# 			element_values[i])
+
+			elif fieldName in ['StringField', 'IntegerField', 'BooleanField',
+                               'FileField']:
+				FieldClass = getattr(wtforms, fieldName)
+				setattr(SuperForm, element, FieldClass(element,
+													  validators=validators[i]))
 				setattr(SuperForm, element+'_placeholder', #Setting default
-						element_values[i])
-
-			elif fieldName == 'IntegerField':
-				setattr(SuperForm, element,
-						IntegerField(element))
-				setattr(SuperForm, element + '_placeholder',  # Setting default
-						element_values[i])
-
-			elif fieldName == 'BooleanField':
-				setattr(SuperForm, element,
-						BooleanField(element))
-				setattr(SuperForm, element + '_placeholder',  # Setting default
 						element_values[i])
 
 	return SuperForm
@@ -123,8 +110,6 @@ def createSuperForm(elements, element_fields, element_values,
 def getPreprocessForm():
 	""" Gets the preprocessing form generated from the superform above.
 
-	Args:
-		adata (AnnData): AnnData containing the spatial RNA-seq data.
 	Returns:
 		FlaskForm: With attributes that allow for inputs that are related to
 					pre-processing.
@@ -141,6 +126,61 @@ def getPreprocessForm():
 					  'Title', 'BooleanField', 'BooleanField', 'BooleanField'
 					  ]
 	element_values = ['', 200, 300, '', 3, 5, '', True, True, True]
-	return createSuperForm(elements, element_fields, element_values, None)
+	return createSuperForm(elements, element_fields, element_values)
+
+def getCCIForm():
+	""" Gets the CCI form generated from the superform above.
+
+	Returns:
+		FlaskForm: With attributes that allow for inputs that are related to
+					CCI analysis.
+	"""
+	elements = ['Cell Heterogeneity File',
+				'Neighbourhood distance (0 indicates within-spot mode)',
+				'L-R pair input (e.g. L1_R1, L2_R2, ...)',
+				'Permutations (0 indicates no permutation testing)']
+	element_fields = ['FileField', 'IntegerField', 'StringField',
+					  'IntegerField']
+	element_values = ['', 10, '', 0]
+	return createSuperForm(elements, element_fields, element_values)
+
+# def getCCIForm(step_log):
+# 	""" Gets the CCI form generated from the superform above.
+#
+# 	Returns:
+# 		FlaskForm: With attributes that allow for inputs that are related to
+# 					CCI analysis.
+# 	"""
+# 	elements, element_fields, element_values = [], [], []
+# 	if type(step_log['cci_het']) == type(None):
+# 		# Analysis type form version #
+# 		analysis_elements = ['Cell Heterogeneity Information', # Title
+# 							 'cci_het',
+# 							 'Permutation Testing', # Title
+# 							 'cci_perm']
+# 		analysis_fields = ['Title', 'SelectField', 'Title', 'SelectField']
+# 		label_transfer_options = ['Upload Cell Label Transfer',
+# 								  'No Cell Label Transfer']
+# 		permutation_options = ['With permutation testing',
+# 							   'Without permutation testing']
+# 		analysis_values = ['', label_transfer_options, '', permutation_options]
+# 		elements += analysis_elements
+# 		element_fields += analysis_fields
+# 		element_values += analysis_values
+#
+# 	else:
+# 		# Core elements regardless of CCI mode #
+# 		elements += ['Neighbourhood distance',
+# 					 'L-R pair input (e.g. L1_R1, L2_R2, ...)']
+# 		element_fields += ['IntegerField', 'StringField']
+# 		element_values += [5, '']
+#
+# 		if step_log['cci_perm']:
+# 			# Including cell heterogeneity information #
+# 			elements += ['Permutations']
+# 			element_fields += ['IntegerField']
+# 			element_values += [200]
+#
+# 	return createSuperForm(elements, element_fields, element_values, None)
 
 

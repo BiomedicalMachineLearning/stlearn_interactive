@@ -69,8 +69,9 @@ def clustering():
 
 @app.route("/cci")
 def cci():
-    return render_template("cci.html", step_log=step_log)
-
+    global adata, step_log
+    updated_page = views.run_cci(request, adata, step_log)
+    return updated_page
 
 @app.route("/psts")
 def psts():

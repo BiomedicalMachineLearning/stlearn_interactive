@@ -4,7 +4,8 @@ Flow of data:
     app.py/preprocessing() 
        -> source/forms/views.py/run_preprocessing(request, adata, step_log)
           -> source/forms/forms.py/getPreprocessForm()
-          -> templates/superform.html
+          -> templates/preprocessing.html
+             -> templates/superform.html
 
 Notes:    
                   
@@ -19,7 +20,12 @@ Notes:
         general WTForm generator, as defined in:
         source/forms/forms.py/createSuperForm()
         
+    * templates/preprocessing.html is the preprocessing page, which also injects
+        in a form to display using templates/superform.html.     
+        
     * templates/superform.html renders a general WTForm that was created using 
         the source/forms/forms.py/createSuperForm() function, thereby allowing
         easy generation of new forms if need to add extra information. 
+        
+    
     

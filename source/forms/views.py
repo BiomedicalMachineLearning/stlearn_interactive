@@ -12,7 +12,7 @@ from flask import render_template
 
 import scanpy as sc
 
-# Creating the preprocessing form using a class generator #
+# Creating the forms using a class generator #
 PreprocessForm = forms.getPreprocessForm()
 
 def getVal(preprocess_form, element):
@@ -23,8 +23,6 @@ def run_preprocessing(request, adata, step_log):
 	"""
 
 	form = PreprocessForm(request.form)
-
-	print(adata, step_log, file=sys.stdout)
 
 	if not form.validate_on_submit():
 		flash_errors(form)
@@ -39,7 +37,6 @@ def run_preprocessing(request, adata, step_log):
 		for i, element in enumerate(form_elements):
 			if form_fields[i] != 'Title':
 				data = getVal(form, element)
-				print(data, file=sys.stdout)
 				step_log['preprocessed_params'][element] = data
 
 		# QC filtering #
@@ -66,12 +63,45 @@ def run_preprocessing(request, adata, step_log):
 	if step_log['preprocessed'][0]:
 		flash("Preprocessing completed!")
 
-	updated_page = render_template("superform.html",
+	updated_page = render_template("preprocessing.html",
 								   title="Preprocessing",
-									superForm=form,
-								   preprocessed=True,
-								   step_log=step_log
-									)
+									preprocess_form=form,
+								   preprocessed=step_log['preprocessed'][0],
+                                   step_log=step_log)
 
 	return updated_page
+
+def run_cci(request, adata, step_log):
+	""" Performs CCI analysis & alters the CCI form depending on the optional
+		aspects of the analysis chosen by the user as specified in step_log.
+	"""
+
+	CCIForm = forms.getCCIForm()
+	form = CCIForm(request.form)
+
+	if not form.validate_on_submit():
+		flash_errors(form)
+
+	elif type(adata) == type(None):
+		flash("Need to load data first!")
+
+	elif type(step_log['cci_het']) != type(None):
+		""" If we have been through the steps of:
+			1. Choosing with/without cell heterogeneity information.
+			2. Choosing with/without permutation testing.
+			3. Filling out information.
+			We are now ready to take the form input & perform CCI analysis.
+		"""
+		# TODO impliment the CCI analyses, saving plots to temp_plots/
+
+		print("We are using the cell heterogeneity!", file=sys.stdout)
+
+	updated_page = render_template("cci.html",
+								   title="Cell-Cell Interaction",
+								   cci_form=form
+								   )
+
+	return updated_page
+
+
 

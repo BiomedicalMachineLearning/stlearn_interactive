@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<h1 class="mt-5">{{ title }}</h1>
+
+	{# Below block indicates whether pre-processing already completed #}
+	{% if preprocessed %}
+	<div class="container">
+	    {% for message in get_flashed_messages() %}
+	    <div class="alert alert-warning">
+	        <button type="button" class="close" data-dismiss="alert">&times;</button>
+	        {{ message }}
+	    </div>
+	    {% endfor %}
+
+	    {% block page_content %}{% endblock %}
+	</div>
+	{% endif %}
+
+	{# Below is the form. #}
+    {% with superForm=preprocess_form %}
+    {% include "superform.html" %}
+    {% endwith %}
+
+{% endblock %}
+
+{% block status %}
+{% include "progress.html" %}
+{% endblock %}
