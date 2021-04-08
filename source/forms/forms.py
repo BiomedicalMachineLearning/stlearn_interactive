@@ -135,13 +135,13 @@ def getCCIForm():
 		FlaskForm: With attributes that allow for inputs that are related to
 					CCI analysis.
 	"""
-	elements = ['Cell Heterogeneity File',
+	elements = ['* Cell Heterogeneity File',
 				'Neighbourhood distance (0 indicates within-spot mode)',
-				'L-R pair input (e.g. L1_R1, L2_R2, ...)',
+				'** L-R pair input (e.g. L1_R1, L2_R2, ...)',
 				'Permutations (0 indicates no permutation testing)']
 	element_fields = ['FileField', 'IntegerField', 'StringField',
 					  'IntegerField']
-	element_values = ['', 10, '', 0]
+	element_values = ['', 25, '', 0]
 	return createSuperForm(elements, element_fields, element_values)
 
 # def getCCIForm(step_log):

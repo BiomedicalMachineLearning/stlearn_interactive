@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 
 import os, sys
 import stlearn
+import numpy
 
 import asyncio
 from bokeh.server.server import BaseServer
@@ -28,12 +29,13 @@ from source.forms import views # for changing data in response to input
 global adata # Storing the data
 adata = None
 global step_log # Keeps track of what step we're up to (performed preprocessing?)
-step_log = {'uploaded': [False,"Upload file"],
-            'preprocessed': [False,"Preprocessing"],
-            'clustering': [False,"Clustering"],
-            'psts': [False,"Spatial trajectory"],
-            'cci': [False,"Cell-cell interaction"],
-            "preprocessed_params": {}}
+step_log = {'uploaded': [False, "Upload file"],
+            'preprocessed': [False, "Preprocessing"],
+            'clustering': [False, "Clustering"],
+            'psts': [False, "Spatial trajectory"],
+            'cci': [False, "Cell-cell interaction"],
+            "preprocessed_params": {}, #_params suffix important for
+            'cci_params': {}}          #templates/progress.html
 
 #print(stlearn, file=sys.stdout)
 
@@ -66,8 +68,7 @@ def preprocessing():
 def clustering():
     return render_template("clustering.html", step_log=step_log)
 
-
-@app.route("/cci")
+@app.route("/cci", methods=["GET", "POST"])
 def cci():
     global adata, step_log
     updated_page = views.run_cci(request, adata, step_log)
@@ -126,6 +127,10 @@ def uploader_file():
     flash("File uploaded successfully")
     global adata, step_log
     adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
+    adata.var_names_make_unique() #removing duplicates
+    # ensuring compatible format for CCI, since need _ to pair LRs #
+    adata.var_names = numpy.array([var_name.replace('_', '-')
+                                  for var_name in adata.var_names])
 
     step_log["uploaded"][0] = True
 

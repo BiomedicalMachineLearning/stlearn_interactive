@@ -4,7 +4,7 @@
 
 
 {% for key, value in step_log.items() %}
-	{% if 'preprocessed_params' != key %}
+	{% if 'params' not in key %}
 		{% if value[0] %}
 			<li class="list-group-item"><span class="badge badge-pill badge-success">Success</span> {{ value[1] }} </li>
 		{% else %}
