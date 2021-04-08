@@ -17,6 +17,8 @@ from flask import render_template
 import scanpy as sc
 import stlearn as st
 
+from scipy.spatial.distance import cosine
+
 # Creating the forms using a class generator #
 PreprocessForm = forms.getPreprocessForm()
 CCIForm = forms.getCCIForm()
@@ -187,7 +189,7 @@ def run_clustering(request, adata, step_log):
 				# Image feature extraction #
 				st.pp.tiling(adata)
 				st.pp.extract_feature(adata)
-		
+
 				# apply stSME to data (format of data depending on preprocess)
 				st.spatial.SME.SME_normalize(adata, use_data="raw")
 				adata.X = adata.obsm['raw_SME_normalized']
@@ -198,16 +200,16 @@ def run_clustering(request, adata, step_log):
 				param = int(element_values[3])
 				st.tl.clustering.kmeans(adata, n_clusters=param,
 										use_data="X_pca",
-										key_added="X_pca_kmeans")
-				st.pl.cluster_plot(adata, use_label="X_pca_kmeans")
+										key_added="clusters")
 
 			else: # Louvain
 				param = element_values[3]
 				st.pp.neighbors(adata, n_neighbors=element_values[4],
 																use_rep='X_pca')
-				st.tl.clustering.louvain(adata, resolution=param)
-				st.pl.cluster_plot(adata, use_label="louvain")
+				st.tl.clustering.louvain(adata,
+										 resolution=param, key_added='clusters')
 
+			st.pl.cluster_plot(adata, use_label="clusters")
 			savePlot('clustering.png')
 
 			step_log['clustering'][0] = True
@@ -227,5 +229,74 @@ def run_clustering(request, adata, step_log):
 
 	return updated_page
 
+def run_psts(request, adata, step_log):
+	""" Performs psts analysis; must have performed clustering first.
+	"""
+	# Creating the form with the clustering information #
+	cluster_set = numpy.unique( adata.obs['clusters'].values )
+	order = numpy.argsort( [int(cluster) for cluster in cluster_set] )
+	cluster_set = cluster_set[order]
+	PSTSForm = forms.getPSTSForm(cluster_set)
+	form = PSTSForm(request.form)
+
+	step_log['psts_params'] = vhs.getData(form)
+	print(step_log['psts_params'], file=sys.stdout)
+	elements = list(step_log['psts_params'].keys())
+	# order: pca_comps, SME bool, method, method_param
+	element_values = list(step_log['psts_params'].values())
+
+	if not form.validate_on_submit():
+		flash_errors(form)
+
+	elif type(adata) == type(None):
+		flash("Need to load data first!")
+
+	else:
+		try:
+			# Getting root spot position as one closest to median location for
+			# cluster #
+			cluster_spots = adata.obs['clusters'].values == element_values[0]
+			spot_locs = adata.obs.iloc[:,1:3].loc[cluster_spots,:]
+			median = [numpy.median(spot_locs.values[:,0]),
+					  numpy.median(spot_locs.values[:,1])]
+			med_dists = numpy.apply_along_axis(cosine, 1,
+											   spot_locs.values, median)
+			min_dist = min(med_dists)
+			root_name = spot_locs.index.values[med_dists==min_dist][0]
+			root_index = numpy.where(adata.obs_names==root_name)[0][0]
+			adata.uns["iroot"] = root_index
+
+			print(root_index, median, spot_locs.loc[root_name,:],
+				  file=sys.stdout, flush=True)
+
+			# Performing the TI #
+			print(element_values[-1], file=sys.stdout, flush=True)
+			clusts = [int(clust) for clust in element_values[-1]]
+			st.spatial.trajectory.pseudotime(adata, eps=element_values[1],
+										  use_rep="X_pca", use_label='clusters')
+			st.spatial.trajectory.pseudotimespace_global(adata,
+									 use_label="clusters", list_clusters=clusts)
+
+			st.pl.cluster_plot(adata, use_label="clusters",
+							   show_trajectories=True, list_clusters=clusts,
+							   show_subcluster=True)
+			savePlot('trajectory_inference.png')
+
+			step_log['psts'][0] = True
+			flash('Trajectory inference completed!')
+
+		except Exception as msg:
+			traceback.print_exc(file=sys.stdout)
+			flash('Analysis ERROR: ' + str(msg))
+			print(msg)
+
+	updated_page = render_template("psts.html",
+								   title=step_log['psts'][1],
+								   psts_form=form,
+								   flash_bool=True,
+								   step_log=step_log
+								   )
+
+	return updated_page
 
 

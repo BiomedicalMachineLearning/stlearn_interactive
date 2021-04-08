@@ -35,7 +35,8 @@ step_log = {'uploaded': [False, "Upload file"],
             'psts': [False, "Spatial trajectory"],
             'cci': [False, "Cell-cell interaction"],
             #_params suffix important for templates/progress.html
-            'preprocessed_params': {}, 'cci_params': {}, 'cluster_params': {}
+            'preprocessed_params': {}, 'cci_params': {}, 'cluster_params': {},
+            'psts_params': {}
             }
 
 #print(stlearn, file=sys.stdout)
@@ -77,9 +78,11 @@ def cci():
     updated_page = views.run_cci(request, adata, step_log)
     return updated_page
 
-@app.route("/psts")
+@app.route("/psts", methods=["GET", "POST"])
 def psts():
-    return render_template("psts.html", step_log=step_log)
+    global adata, step_log
+    updated_page = views.run_psts(request, adata, step_log)
+    return updated_page
 
 
 allow_files = [

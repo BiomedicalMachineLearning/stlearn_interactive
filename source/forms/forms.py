@@ -152,13 +152,29 @@ def getClusterForm():
 	"""
 	elements = ['PCA components', 'stSME normalisation', 'Cluster method',
 				'Cluster param (k for KMeans, resolution for Louvain)',
-                'Neighbours (for Louvain)']
+				'Neighbours (for Louvain)']
 	element_fields = ['IntegerField', 'BooleanField', 'SelectField',
 					  'FloatField', 'IntegerField']
 	element_values = [50, True,
-                      [('KMeans', 'KMeans'), ('Louvain', 'Louvain')], 10, 15]
+					  [('KMeans', 'KMeans'), ('Louvain', 'Louvain')], 10, 15]
 	return createSuperForm(elements, element_fields, element_values)
 
+def getPSTSForm(cluster_set):
+	""" Gets the psts form generated using superform above.
+
+	Args:
+		cluster_set (numpy.array<str>): The clusters which can be selected as
+										the root for psts analysis.
+
+	Returns:
+		FlaskForm: With attributes that allow input related to psts.
+	"""
+	elements = ['Root cluster', 'eps (max. dist. spot neighbourhood)',
+				'Cluster Select']
+	element_fields = ['SelectField', 'IntegerField', 'SelectMultipleField']
+	clusts = [(clust, clust) for clust in cluster_set]
+	element_values = [clusts, 50, clusts]
+	return createSuperForm(elements, element_fields, element_values)
 
 
 ######################## Junk Code #############################################

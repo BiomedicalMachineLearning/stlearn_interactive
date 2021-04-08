@@ -17,6 +17,12 @@
                 {% if superForm['element_fields'][loop.index0] == 'Title' %}
                     <h3 class="mt-5">{{ element }}</h3>
 
+				{% elif superForm['element_fields'][loop.index0] == 'SelectMultipleField' %}
+                    <div class="form_group">
+                        {{ superForm[element].label }}
+                        {{ superForm[element](class_="form-control", rows=5, multiple=True) }}
+                    </div>
+
 				{% elif superForm['element_fields'][loop.index0] == 'SelectField' %}
                     <div class="form-group">
                         {{ element }}
