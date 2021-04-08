@@ -98,7 +98,7 @@ def createSuperForm(elements, element_fields, element_values,
 			# 			element_values[i])
 
 			elif fieldName in ['StringField', 'IntegerField', 'BooleanField',
-                               'FileField']:
+							   'FileField', 'FloatField']:
 				FieldClass = getattr(wtforms, fieldName)
 				setattr(SuperForm, element, FieldClass(element,
 													  validators=validators[i]))
@@ -144,6 +144,24 @@ def getCCIForm():
 	element_values = ['', 25, '', 0]
 	return createSuperForm(elements, element_fields, element_values)
 
+def getClusterForm():
+	""" Gets the Cluster form generated using superform above.
+
+	Returns:
+		FlaskForm: With attributes that allow input related to clustering.
+	"""
+	elements = ['PCA components', 'stSME normalisation', 'Cluster method',
+				'Cluster param (k for KMeans, resolution for Louvain)',
+                'Neighbours (for Louvain)']
+	element_fields = ['IntegerField', 'BooleanField', 'SelectField',
+					  'FloatField', 'IntegerField']
+	element_values = [50, True,
+                      [('KMeans', 'KMeans'), ('Louvain', 'Louvain')], 10, 15]
+	return createSuperForm(elements, element_fields, element_values)
+
+
+
+######################## Junk Code #############################################
 # def getCCIForm(step_log):
 # 	""" Gets the CCI form generated from the superform above.
 #

@@ -20,6 +20,7 @@ import stlearn as st
 # Creating the forms using a class generator #
 PreprocessForm = forms.getPreprocessForm()
 CCIForm = forms.getCCIForm()
+ClusterForm = forms.getClusterForm()
 
 def run_preprocessing(request, adata, step_log):
 	""" Performs the scanpy pre-processing steps based on the inputted data.
@@ -63,7 +64,7 @@ def run_preprocessing(request, adata, step_log):
 		flash("Preprocessing completed!")
 
 	updated_page = render_template("preprocessing.html",
-								   title="Preprocessing",
+								   title=step_log['preprocessed'][1],
 									preprocess_form=form,
 								   flash_bool=step_log['preprocessed'][0],
 								   step_log=step_log)
@@ -71,8 +72,7 @@ def run_preprocessing(request, adata, step_log):
 	return updated_page
 
 def run_cci(request, adata, step_log):
-	""" Performs CCI analysis & alters the CCI form depending on the optional
-		aspects of the analysis chosen by the user as specified in step_log.
+	""" Performs CCI analysis.
 	"""
 
 	form = CCIForm(request.form)
@@ -81,7 +81,7 @@ def run_cci(request, adata, step_log):
 	print(step_log['cci_params'], file=sys.stdout)
 	elements = numpy.array(list(step_log['cci_params'].keys()))
 	#order: cell_het file, neighbour_dist, L-R pairs, permutations
-	element_values = numpy.array(list(step_log['cci_params'].values()))
+	element_values = list(step_log['cci_params'].values())
 
 	cell_het = type(element_values[0]) != type(None)
 	lrs, msg = vhs.getLR(element_values[2], adata.var_names)
@@ -150,8 +150,77 @@ def run_cci(request, adata, step_log):
 			print(msg)
 
 	updated_page = render_template("cci.html",
-								   title="Cell-Cell Interaction",
+								   title=step_log['cci'][1],
 								   cci_form=form,
+								   flash_bool=True,
+								   step_log=step_log
+								   )
+
+	return updated_page
+
+def run_clustering(request, adata, step_log):
+	""" Performs clustering analysis.
+	"""
+
+	form = ClusterForm(request.form)
+
+	step_log['cluster_params'] = vhs.getData(form)
+	print(step_log['cluster_params'], file=sys.stdout)
+	elements = list(step_log['cluster_params'].keys())
+	#order: pca_comps, SME bool, method, method_param
+	element_values = list(step_log['cluster_params'].values())
+
+	if not form.validate_on_submit():
+		flash_errors(form)
+
+	elif type(adata) == type(None):
+		flash("Need to load data first!")
+
+	else:
+		try:
+			# Running PCA, performs scaling internally #
+			n_comps = element_values[0]
+			st.em.run_pca(adata, n_comps=n_comps)
+
+			print(element_values[1], file=sys.stdout, flush=True)
+			if element_values[1]: # Performing SME clustering #
+				# Image feature extraction #
+				st.pp.tiling(adata)
+				st.pp.extract_feature(adata)
+		
+				# apply stSME to data (format of data depending on preprocess)
+				st.spatial.SME.SME_normalize(adata, use_data="raw")
+				adata.X = adata.obsm['raw_SME_normalized']
+				st.em.run_pca(adata, n_comps=n_comps)
+
+			# Performing the clustering on the PCA #
+			if element_values[2] == 'KMeans': # KMeans
+				param = int(element_values[3])
+				st.tl.clustering.kmeans(adata, n_clusters=param,
+										use_data="X_pca",
+										key_added="X_pca_kmeans")
+				st.pl.cluster_plot(adata, use_label="X_pca_kmeans")
+
+			else: # Louvain
+				param = element_values[3]
+				st.pp.neighbors(adata, n_neighbors=element_values[4],
+																use_rep='X_pca')
+				st.tl.clustering.louvain(adata, resolution=param)
+				st.pl.cluster_plot(adata, use_label="louvain")
+
+			savePlot('clustering.png')
+
+			step_log['clustering'][0] = True
+			flash('Clustering completed!')
+
+		except Exception as msg:
+			traceback.print_exc(file=sys.stdout)
+			flash('Analysis ERROR: '+str(msg))
+			print(msg)
+
+	updated_page = render_template("clustering.html",
+								   title=step_log['clustering'][1],
+								   clustering_form=form,
 								   flash_bool=True,
 								   step_log=step_log
 								   )

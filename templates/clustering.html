@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-  <p>Clustering</p>
+  <h1 class="mt-5">{{ title }}</h1>
+
+	{# Below indicates whether clustering already completed #}
+	{% include "flash_header.html" %}
+
+	{# Below is the form. #}
+    {% with superForm=clustering_form %}
+    {% include "superform.html" %}
+    {% endwith %}
+
 {% endblock %}
 
 {% block status %}

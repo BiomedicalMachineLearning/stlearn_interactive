@@ -34,8 +34,9 @@ step_log = {'uploaded': [False, "Upload file"],
             'clustering': [False, "Clustering"],
             'psts': [False, "Spatial trajectory"],
             'cci': [False, "Cell-cell interaction"],
-            "preprocessed_params": {}, #_params suffix important for
-            'cci_params': {}}          #templates/progress.html
+            #_params suffix important for templates/progress.html
+            'preprocessed_params': {}, 'cci_params': {}, 'cluster_params': {}
+            }
 
 #print(stlearn, file=sys.stdout)
 
@@ -64,9 +65,11 @@ def preprocessing():
     updated_page = views.run_preprocessing(request, adata, step_log)
     return updated_page
 
-@app.route("/clustering")
+@app.route("/clustering", methods=["GET", "POST"])
 def clustering():
-    return render_template("clustering.html", step_log=step_log)
+    global adata, step_log
+    updated_page = views.run_clustering(request, adata, step_log)
+    return updated_page
 
 @app.route("/cci", methods=["GET", "POST"])
 def cci():

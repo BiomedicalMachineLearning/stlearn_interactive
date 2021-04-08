@@ -47,6 +47,14 @@
                                                         class_="form-control")}}
                     </div>
 
+				{% elif superForm['element_fields'][loop.index0] == 'FloatField' %}
+                    <div class="form-group">
+                        {{ element }}
+                        {{ superForm[element](
+                                  value=superForm[element+'_placeholder'],
+                                                        class_="form-control")}}
+                    </div>
+
 				{% elif superForm['element_fields'][loop.index0] == 'FileField' %}
                     {{ element }}
                     {{ superForm[element] }}
