@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<h1 class="mt-5">{{ title }}</h1>
+<div class="card">
+	<div class="card-header card-header-primary">
+		<h4 class="card-title">Preprocessing</h4>
+	</div>
+	<div class="card-body">
 
 	{# Below indicates whether pre-processing already completed #}
 	{% include "flash_header.html" %}
@@ -10,7 +14,9 @@
     {% with superForm=preprocess_form %}
     {% include "superform.html" %}
     {% endwith %}
-
+    
+	</div>
+</div>
 {% endblock %}
 
 {% block status %}

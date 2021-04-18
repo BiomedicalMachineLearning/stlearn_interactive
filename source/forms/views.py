@@ -255,18 +255,18 @@ def run_psts(request, adata, step_log):
 		try:
 			# Getting root spot position as one closest to median location for
 			# cluster #
-			cluster_spots = adata.obs['clusters'].values == element_values[0]
-			spot_locs = adata.obs.iloc[:,1:3].loc[cluster_spots,:]
-			median = [numpy.median(spot_locs.values[:,0]),
-					  numpy.median(spot_locs.values[:,1])]
-			med_dists = numpy.apply_along_axis(cosine, 1,
-											   spot_locs.values, median)
-			min_dist = min(med_dists)
-			root_name = spot_locs.index.values[med_dists==min_dist][0]
-			root_index = numpy.where(adata.obs_names==root_name)[0][0]
-			adata.uns["iroot"] = root_index
+			# cluster_spots = adata.obs['clusters'].values == element_values[0]
+			# spot_locs = adata.obs.iloc[:,1:3].loc[cluster_spots,:]
+			# median = [numpy.median(spot_locs.values[:,0]),
+			# 		  numpy.median(spot_locs.values[:,1])]
+			# med_dists = numpy.apply_along_axis(cosine, 1,
+			# 								   spot_locs.values, median)
+			# min_dist = min(med_dists)
+			# root_name = spot_locs.index.values[med_dists==min_dist][0]
+			# root_index = numpy.where(adata.obs_names==root_name)[0][0]
+			adata.uns["iroot"] = element_values[0]
 
-			print(root_index, median, spot_locs.loc[root_name,:],
+			print(root_index,#, median, spot_locs.loc[root_name,:],
 				  file=sys.stdout, flush=True)
 
 			# Performing the TI #

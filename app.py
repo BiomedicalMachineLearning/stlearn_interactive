@@ -29,7 +29,7 @@ from source.forms import views # for changing data in response to input
 global adata # Storing the data
 adata = None
 global step_log # Keeps track of what step we're up to (performed preprocessing?)
-step_log = {'uploaded': [False, "Upload file"],
+step_log = {'uploaded': [True, "Upload file"],
             'preprocessed': [False, "Preprocessing"],
             'clustering': [False, "Clustering"],
             'psts': [False, "Spatial trajectory"],
@@ -172,7 +172,7 @@ def reset_session():
 import stlearn as st
 import scanpy as sc
 
-# adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
+adata = st.Read10X("../UQ/Visium_TBI/C1/outs")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
 # sc.pp.normalize_total(adata)

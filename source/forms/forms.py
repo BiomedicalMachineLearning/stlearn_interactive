@@ -171,9 +171,9 @@ def getPSTSForm(cluster_set):
 	"""
 	elements = ['Root cluster', 'eps (max. dist. spot neighbourhood)',
 				'Cluster Select']
-	element_fields = ['SelectField', 'IntegerField', 'SelectMultipleField']
+	element_fields = ['IntegerField', 'IntegerField', 'SelectMultipleField']
 	clusts = [(clust, clust) for clust in cluster_set]
-	element_values = [clusts, 50, clusts]
+	element_values = [0, 50, clusts]
 	return createSuperForm(elements, element_fields, element_values)
 
 

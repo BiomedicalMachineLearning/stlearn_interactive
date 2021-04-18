@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h1 class="mt-5">{{ title }}</h1>
+ <div class="card">
+   <div class="card-header card-header-primary">
+		<h4 class="card-title">Clustering</h4>
+   </div>
+   <div class="card-body">
 
 	{# Below indicates whether clustering already completed #}
 	{% include "flash_header.html" %}
@@ -9,7 +13,8 @@
     {% with superForm=clustering_form %}
     {% include "superform.html" %}
     {% endwith %}
-
+   </div>
+</div>
 {% endblock %}
 
 {% block status %}
