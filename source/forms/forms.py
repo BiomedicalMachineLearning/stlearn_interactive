@@ -6,13 +6,14 @@
 
 import sys
 from flask_wtf import FlaskForm
-#from flask_wtf.file import FileField
+
+# from flask_wtf.file import FileField
 from wtforms import SelectMultipleField, SelectField
 import wtforms
 
-def createSuperForm(elements, element_fields, element_values,
-					validators=None):
-	""" Creates a general form; goal is to create a fully programmable form \
+
+def createSuperForm(elements, element_fields, element_values, validators=None):
+    """ Creates a general form; goal is to create a fully programmable form \
 	that essentially governs all the options the user will select.
 
 	Args:
@@ -54,127 +55,186 @@ def createSuperForm(elements, element_fields, element_values,
 		'SuperDataDisplay.html' shows the form.
 	"""
 
-	class SuperForm(FlaskForm):
-		""" A base form on which all of the fields will be added.
-		"""
+    class SuperForm(FlaskForm):
+        """A base form on which all of the fields will be added."""
 
-	if type(validators) == type(None):
-		validators = [None] * len(elements)
+    if type(validators) == type(None):
+        validators = [None] * len(elements)
 
-	# Add the information #
-	SuperForm.elements = elements
-	SuperForm.element_fields = element_fields
+    # Add the information #
+    SuperForm.elements = elements
+    SuperForm.element_fields = element_fields
 
-	multiSelectLeft = True # Places multi-select field to left, alternatives
-							# if many multi-selects in row
-	for i, element in enumerate( elements ):
-		fieldName = element_fields[i]
+    multiSelectLeft = True  # Places multi-select field to left, alternatives
+    # if many multi-selects in row
+    for i, element in enumerate(elements):
+        fieldName = element_fields[i]
 
-		# Adding each element as the appropriate field to the form #
-		if fieldName=='SelectMultipleField':
-			setattr(SuperForm, element,
-					SelectMultipleField(element, choices=element_values[i]))
-			# The point of this number is to give an order for the attributes,
-			# so that odd numbers get rendered to right of page, even numbers
-			# left.
-			setattr(SuperForm, element + '_number', int(multiSelectLeft))
-			# inverts, so if left, goes right for the next multiSelectField
-			multiSelectLeft = multiSelectLeft == False
+        # Adding each element as the appropriate field to the form #
+        if fieldName == "SelectMultipleField":
+            setattr(
+                SuperForm,
+                element,
+                SelectMultipleField(element, choices=element_values[i]),
+            )
+            # The point of this number is to give an order for the attributes,
+            # so that odd numbers get rendered to right of page, even numbers
+            # left.
+            setattr(SuperForm, element + "_number", int(multiSelectLeft))
+            # inverts, so if left, goes right for the next multiSelectField
+            multiSelectLeft = multiSelectLeft == False
 
-		else:
-			multiSelectLeft = True # Reset the MultiSelectField position
+        else:
+            multiSelectLeft = True  # Reset the MultiSelectField position
 
-			if fieldName in ['Title', 'List']:
-				setattr(SuperForm, element, element_values[i])
+            if fieldName in ["Title", "List"]:
+                setattr(SuperForm, element, element_values[i])
 
-			elif fieldName == 'SelectField':
-				setattr(SuperForm, element,
-						SelectField(element, choices=element_values[i],
-									validators=validators[i]))
+            elif fieldName == "SelectField":
+                setattr(
+                    SuperForm,
+                    element,
+                    SelectField(
+                        element, choices=element_values[i], validators=validators[i]
+                    ),
+                )
 
-			# elif fieldName == 'FileField':
-			# 	setattr(SuperForm, element, FileField(validators=validators[i]))
-			# 	setattr(SuperForm, element + '_placeholder',  # Setting default
-			# 			element_values[i])
+            # elif fieldName == 'FileField':
+            # 	setattr(SuperForm, element, FileField(validators=validators[i]))
+            # 	setattr(SuperForm, element + '_placeholder',  # Setting default
+            # 			element_values[i])
 
-			elif fieldName in ['StringField', 'IntegerField', 'BooleanField',
-							   'FileField', 'FloatField']:
-				FieldClass = getattr(wtforms, fieldName)
-				setattr(SuperForm, element, FieldClass(element,
-													  validators=validators[i]))
-				setattr(SuperForm, element+'_placeholder', #Setting default
-						element_values[i])
+            elif fieldName in [
+                "StringField",
+                "IntegerField",
+                "BooleanField",
+                "FileField",
+                "FloatField",
+            ]:
+                FieldClass = getattr(wtforms, fieldName)
+                setattr(
+                    SuperForm, element, FieldClass(element, validators=validators[i])
+                )
+                setattr(
+                    SuperForm,
+                    element + "_placeholder",  # Setting default
+                    element_values[i],
+                )
 
-	return SuperForm
+    return SuperForm
+
 
 def getPreprocessForm():
-	""" Gets the preprocessing form generated from the superform above.
+    """Gets the preprocessing form generated from the superform above.
 
-	Returns:
-		FlaskForm: With attributes that allow for inputs that are related to
-					pre-processing.
-	"""
-	elements = ['Spot Quality Control Filtering', # Title
-				'Minimum genes per spot', 'Minimum counts per spot',
-				'Gene Quality Control Filtering', # Title
-				'Minimum spots per gene', 'Minimum counts per gene',
-				'Normalisation, Log-transform, & Scaling', # Title
-				'Normalize total', 'Log 1P', 'Scale'
-				]
-	element_fields = ['Title', 'IntegerField', 'IntegerField',
-					  'Title', 'IntegerField', 'IntegerField',
-					  'Title', 'BooleanField', 'BooleanField', 'BooleanField'
-					  ]
-	element_values = ['', 200, 300, '', 3, 5, '', True, True, True]
-	return createSuperForm(elements, element_fields, element_values)
+    Returns:
+            FlaskForm: With attributes that allow for inputs that are related to
+                                    pre-processing.
+    """
+    elements = [
+        "Spot Quality Control Filtering",  # Title
+        "Minimum genes per spot",
+        "Minimum counts per spot",
+        "Gene Quality Control Filtering",  # Title
+        "Minimum spots per gene",
+        "Minimum counts per gene",
+        "Normalisation, Log-transform, & Scaling",  # Title
+        "Normalize total",
+        "Log 1P",
+        "Scale",
+    ]
+    element_fields = [
+        "Title",
+        "IntegerField",
+        "IntegerField",
+        "Title",
+        "IntegerField",
+        "IntegerField",
+        "Title",
+        "BooleanField",
+        "BooleanField",
+        "BooleanField",
+    ]
+    element_values = ["", 200, 300, "", 3, 5, "", True, True, True]
+    return createSuperForm(elements, element_fields, element_values)
+
 
 def getCCIForm():
-	""" Gets the CCI form generated from the superform above.
+    """Gets the CCI form generated from the superform above.
 
-	Returns:
-		FlaskForm: With attributes that allow for inputs that are related to
-					CCI analysis.
-	"""
-	elements = ['* Cell Heterogeneity File',
-				'Neighbourhood distance (0 indicates within-spot mode)',
-				'** L-R pair input (e.g. L1_R1, L2_R2, ...)',
-				'Permutations (0 indicates no permutation testing)']
-	element_fields = ['FileField', 'IntegerField', 'StringField',
-					  'IntegerField']
-	element_values = ['', 25, '', 0]
-	return createSuperForm(elements, element_fields, element_values)
+    Returns:
+            FlaskForm: With attributes that allow for inputs that are related to
+                                    CCI analysis.
+    """
+    elements = [
+        "* Cell Heterogeneity File",
+        "Neighbourhood distance (0 indicates within-spot mode)",
+        "** L-R pair input (e.g. L1_R1, L2_R2, ...)",
+        "Permutations (0 indicates no permutation testing)",
+    ]
+    element_fields = ["FileField", "IntegerField", "StringField", "IntegerField"]
+    element_values = ["", 25, "", 0]
+    return createSuperForm(elements, element_fields, element_values)
+
 
 def getClusterForm():
-	""" Gets the Cluster form generated using superform above.
+    """Gets the Cluster form generated using superform above.
 
-	Returns:
-		FlaskForm: With attributes that allow input related to clustering.
-	"""
-	elements = ['PCA components', 'stSME normalisation', 'Cluster method',
-				'Cluster param (k for KMeans, resolution for Louvain)',
-				'Neighbours (for Louvain)']
-	element_fields = ['IntegerField', 'BooleanField', 'SelectField',
-					  'FloatField', 'IntegerField']
-	element_values = [50, True,
-					  [('KMeans', 'KMeans'), ('Louvain', 'Louvain')], 10, 15]
-	return createSuperForm(elements, element_fields, element_values)
+    Returns:
+            FlaskForm: With attributes that allow input related to clustering.
+    """
+    elements = [
+        "PCA components",
+        "stSME normalisation",
+        "Cluster method",
+        "K",
+        "Resolution",
+        "Neighbours (for Louvain)",
+    ]
+    element_fields = [
+        "IntegerField",
+        "BooleanField",
+        "SelectField",
+        "IntegerField",
+        "FloatField",
+        "IntegerField",
+    ]
+    element_values = [
+        50,
+        True,
+        [("KMeans", "KMeans"), ("Louvain", "Louvain")],
+        10,
+        1.0,
+        15,
+    ]
+    return createSuperForm(elements, element_fields, element_values)
+
 
 def getPSTSForm(cluster_set):
-	""" Gets the psts form generated using superform above.
+    """Gets the psts form generated using superform above.
 
-	Args:
-		cluster_set (numpy.array<str>): The clusters which can be selected as
-										the root for psts analysis.
+    Args:
+            cluster_set (numpy.array<str>): The clusters which can be selected as
+                                                                            the root for psts analysis.
 
-	Returns:
-		FlaskForm: With attributes that allow input related to psts.
-	"""
-	elements = ['Root cluster', 'eps (max. dist. spot neighbourhood)',
-				'Cluster Select']
-	element_fields = ['IntegerField', 'IntegerField', 'SelectMultipleField']
-	clusts = [(clust, clust) for clust in cluster_set]
-	element_values = [0, 50, clusts]
-	return createSuperForm(elements, element_fields, element_values)
+    Returns:
+            FlaskForm: With attributes that allow input related to psts.
+    """
+    elements = [
+        "Root cluster",
+        "Reverse",
+        "eps (max. dist. spot neighbourhood)",
+        "Cluster Select",
+    ]
+    element_fields = [
+        "SelectField",
+        "BooleanField",
+        "IntegerField",
+        "SelectMultipleField",
+    ]
+    clusts = [(clust, clust) for clust in cluster_set]
+    element_values = [clusts, False, 50, clusts]
+    return createSuperForm(elements, element_fields, element_values)
 
 
 ######################## Junk Code #############################################
@@ -216,5 +276,3 @@ def getPSTSForm(cluster_set):
 # 			element_values += [200]
 #
 # 	return createSuperForm(elements, element_fields, element_values, None)
-
-

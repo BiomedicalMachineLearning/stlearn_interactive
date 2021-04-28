@@ -20,26 +20,28 @@ from bokeh.embed import server_document
 
 from bokeh.layouts import column, row
 
-""" Functions related to processing the forms.
-"""
-from source.forms import views # for changing data in response to input
+# Functions related to processing the forms.
+from source.forms import views  # for changing data in response to input
 
-""" Global variables.
-"""
-global adata # Storing the data
+# Global variables.
+
+global adata  # Storing the data
 adata = None
-global step_log # Keeps track of what step we're up to (performed preprocessing?)
-step_log = {'uploaded': [True, "Upload file"],
-            'preprocessed': [False, "Preprocessing"],
-            'clustering': [False, "Clustering"],
-            'psts': [False, "Spatial trajectory"],
-            'cci': [False, "Cell-cell interaction"],
-            #_params suffix important for templates/progress.html
-            'preprocessed_params': {}, 'cci_params': {}, 'cluster_params': {},
-            'psts_params': {}
-            }
+global step_log  # Keeps track of what step we're up to (performed preprocessing?)
+step_log = {
+    "uploaded": [True, "Upload file"],
+    "preprocessed": [False, "Preprocessing"],
+    "clustering": [False, "Clustering"],
+    "psts": [False, "Spatial trajectory"],
+    "cci": [False, "Cell-cell interaction"],
+    # _params suffix important for templates/progress.html
+    "preprocessed_params": {},
+    "cci_params": {},
+    "cluster_params": {},
+    "psts_params": {},
+}
 
-#print(stlearn, file=sys.stdout)
+# print(stlearn, file=sys.stdout)
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -51,6 +53,7 @@ app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 app.config["TEMPLATES_AUTO_RELOAD"] = TEMPLATES_AUTO_RELOAD
 app.config["SESSION_PERMANENT"] = False
 
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html", step_log=step_log)
@@ -60,11 +63,13 @@ def index():
 def upload():
     return render_template("upload.html", step_log=step_log)
 
+
 @app.route("/preprocessing", methods=["GET", "POST"])
 def preprocessing():
     global adata, step_log
     updated_page = views.run_preprocessing(request, adata, step_log)
     return updated_page
+
 
 @app.route("/clustering", methods=["GET", "POST"])
 def clustering():
@@ -72,11 +77,13 @@ def clustering():
     updated_page = views.run_clustering(request, adata, step_log)
     return updated_page
 
+
 @app.route("/cci", methods=["GET", "POST"])
 def cci():
     global adata, step_log
     updated_page = views.run_cci(request, adata, step_log)
     return updated_page
+
 
 @app.route("/psts", methods=["GET", "POST"])
 def psts():
@@ -102,8 +109,8 @@ def uploader_file():
 
         shutil.rmtree(app.config["UPLOAD_FOLDER"])
         os.makedirs(app.config["UPLOAD_FOLDER"])
-        open(app.config["UPLOAD_FOLDER"] + "/.gitkeep", 'a').close()
-        #os.mknod()
+        open(app.config["UPLOAD_FOLDER"] + "/.gitkeep", "a").close()
+        # os.mknod()
 
         # Get list of files from selected folder
         files = request.files.getlist("file")
@@ -133,46 +140,64 @@ def uploader_file():
     flash("File uploaded successfully")
     global adata, step_log
     adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
-    adata.var_names_make_unique() #removing duplicates
+    adata.var_names_make_unique()  # removing duplicates
     # ensuring compatible format for CCI, since need _ to pair LRs #
-    adata.var_names = numpy.array([var_name.replace('_', '-')
-                                  for var_name in adata.var_names])
+    adata.var_names = numpy.array(
+        [var_name.replace("_", "-") for var_name in adata.var_names]
+    )
 
     step_log["uploaded"][0] = True
 
     return redirect(url_for("upload"))
 
+
 @app.route("/gene_plot")
 def gene_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_gene_plot")
     return render_template(
-        "gene_plot.html", script=script, template="Flask", relative_urls=False, step_log=step_log
+        "gene_plot.html",
+        script=script,
+        template="Flask",
+        relative_urls=False,
+        step_log=step_log,
     )
+
 
 @app.route("/cluster_plot")
 def cluster_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_cluster_plot")
     return render_template(
-        "cluster_plot.html", script=script, template="Flask", relative_urls=False, step_log=step_log
+        "cluster_plot.html",
+        script=script,
+        template="Flask",
+        relative_urls=False,
+        step_log=step_log,
     )
+
 
 @app.route("/cci_plot")
 def cci_plot():
     script = server_document("http://127.0.0.1:5006/bokeh_cci_plot")
     return render_template(
-        "cci_plot.html", script=script, template="Flask", relative_urls=False, step_log=step_log
+        "cci_plot.html",
+        script=script,
+        template="Flask",
+        relative_urls=False,
+        step_log=step_log,
     )
 
-@app.route("/reset_session", methods=['POST'])
+
+@app.route("/reset_session", methods=["POST"])
 def reset_session():
-    #Moving forward code
+    # Moving forward code
     session.clear()
     return redirect(url_for("index"))
 
-import stlearn as st
-import scanpy as sc
 
-adata = st.Read10X("../UQ/Visium_TBI/C1/outs")
+# import stlearn as st
+# import scanpy as sc
+
+# adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
 # sc.pp.normalize_total(adata)
@@ -210,7 +235,7 @@ def modify_doc_gene_plot(doc):
 def modify_doc_cluster_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehClusterPlot
 
-    gp_object = BokehClusterPlot(adata, use_label="leiden")
+    gp_object = BokehClusterPlot(adata, use_label="clusters")
     doc.add_root(row(gp_object.layout, width=800))
 
     gp_object.data_alpha.on_change("value", gp_object.update_data)
@@ -232,35 +257,35 @@ def modify_doc_cci_plot(doc):
     gp_object.het_select.on_change("value", gp_object.update_data)
 
 
-# # App for gene_plot
-# bkapp = Application(FunctionHandler(modify_doc_gene_plot))
+# App for gene_plot
+bkapp = Application(FunctionHandler(modify_doc_gene_plot))
 
-# # App for cluster_plot
-# bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
+# App for cluster_plot
+bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 
-# # App for cci_plot
-# bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
-
-
-# def bk_worker():
-#     asyncio.set_event_loop(asyncio.new_event_loop())
-
-#     server = Server(
-#         {
-#             "/bokeh_gene_plot": bkapp,
-#             "/bokeh_cluster_plot": bkapp2,
-#             "/bokeh_cci_plot": bkapp3,
-#         },
-#         io_loop=IOLoop(),
-#         allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
-#     )
-#     server.start()
-#     server.io_loop.start()
+# App for cci_plot
+bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
 
 
-# from threading import Thread
+def bk_worker():
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
-# Thread(target=bk_worker).start()
+    server = Server(
+        {
+            "/bokeh_gene_plot": bkapp,
+            "/bokeh_cluster_plot": bkapp2,
+            "/bokeh_cci_plot": bkapp3,
+        },
+        io_loop=IOLoop(),
+        allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
+    )
+    server.start()
+    server.io_loop.start()
+
+
+from threading import Thread
+
+Thread(target=bk_worker).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5005, debug=True)
