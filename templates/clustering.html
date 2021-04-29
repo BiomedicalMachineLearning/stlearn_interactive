@@ -1,18 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
-  <p>Clustering</p>
+ <div class="card">
+   <div class="card-header card-header-primary">
+		<h4 class="card-title">Clustering</h4>
+   </div>
+   <div class="card-body">
+
+	{# Below indicates whether clustering already completed #}
+	{% include "flash_header.html" %}
+
+	{# Below is the form. #}
+    {% with superForm=clustering_form %}
+    {% include "superform.html" %}
+    {% endwith %}
+   </div>
+</div>
 {% endblock %}
 
 {% block status %}
+{% include "progress.html" %}
+{% endblock %}
 
-	{% for key, value in step_log.items() %}
-		{% if 'preprocessed_params' != key %}
-			{% if value[0] %}
-				<li class="list-group-item"><span class="badge badge-pill badge-success">Success</span> {{ value[1] }} </li>
-			{% else %}
-				<li class="list-group-item"><span class="badge badge-pill badge-danger">None</span> {{ value[1] }} </li>
-			{% endif %}
-		{% endif %}
-	{% endfor %}
+{% block javascript %}
+<script type="text/javascript">
 
+  $('#registerForm > div:nth-child(6)').css({"display" : "block"});
+  $('#registerForm > div:nth-child(7)').css({"display" : "none"});
+  $('#registerForm > div:nth-child(8)').css({"display" : "none"});
+
+  $("#registerForm > div:nth-child(5)").change(function() {
+      if ($(this).find(":selected").val() == "KMeans") {
+        console.log($(this).val())
+        $('#registerForm > div:nth-child(6)').css({"display" : "block"});
+        $('#registerForm > div:nth-child(7)').css({"display" : "none"});
+        $('#registerForm > div:nth-child(8)').css({"display" : "none"});
+      } else {
+        $('#registerForm > div:nth-child(6)').css({"display" : "none"});
+        $('#registerForm > div:nth-child(7)').css({"display" : "block"});
+        $('#registerForm > div:nth-child(8)').css({"display" : "block"});
+      }
+    });
+</script>
 {% endblock %}

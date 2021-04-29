@@ -1,18 +1,29 @@
 {% extends 'base.html' %}
+
 {% block content %}
-  <p>Cell-cell interactive</p>
+<div class="card">
+	<div class="card-header card-header-primary">
+		<h4 class="card-title">Cell-cell interaction analysis</h4>
+	</div>
+	<div class="card-body">
+
+		{# Gives the user errors if didn't fill out form correctly #}
+		{% include "flash_header.html" %}
+
+		{# Below is the form. #}
+	    {% with superForm=cci_form %}
+	    {% include "superform.html" %}
+	    {% endwith %}
+
+		<footer>
+			<font color="red"> *Optional </font>
+			<br />
+			<font color="red"> **Required </font>
+		</footer>
+	</div>
+</div>
 {% endblock %}
 
 {% block status %}
-
-	{% for key, value in step_log.items() %}
-		{% if 'preprocessed_params' != key %}
-			{% if value[0] %}
-				<li class="list-group-item"><span class="badge badge-pill badge-success">Success</span> {{ value[1] }} </li>
-			{% else %}
-				<li class="list-group-item"><span class="badge badge-pill badge-danger">None</span> {{ value[1] }} </li>
-			{% endif %}
-		{% endif %}
-	{% endfor %}
-
+{% include "progress.html" %}
 {% endblock %}

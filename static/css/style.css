@@ -44,3 +44,7 @@ a.disabled, fieldset:disabled a {
     background-color: inherit;
     border: 0 solid rgba(0,0,0,.125);
 }
+
+#Cluster\ Select {
+    height: 150px
+}

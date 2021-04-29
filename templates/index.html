@@ -75,15 +75,5 @@
 {% endblock %}
 
 {% block status %}
-
-  {% for key, value in step_log.items() %}
-    {% if 'preprocessed_params' != key %}
-      {% if value[0] %}
-        <li class="list-group-item"><span class="badge badge-pill badge-success">Success</span> {{ value[1] }} </li>
-      {% else %}
-        <li class="list-group-item"><span class="badge badge-pill badge-danger">None</span> {{ value[1] }} </li>
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-
+{% include "progress.html" %}
 {% endblock %}

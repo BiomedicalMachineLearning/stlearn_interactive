@@ -219,7 +219,9 @@ def make_ptvis_plot(data):
         id_img = random.randint(3, 99999999)
         id_img2 = random.randint(3, 99999999)
 
-        filelist = [f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png")]
+        filelist = [
+            f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png")
+        ]
         for f in filelist:
             os.remove(os.path.join("stlearn_interactive/static/", f))
 

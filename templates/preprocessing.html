@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="card">
 	<div class="card-header card-header-primary">
-		<h4 class="card-title">Pseudo-time-space analysis</h4>
+		<h4 class="card-title">Preprocessing</h4>
 	</div>
 	<div class="card-body">
 
-	{# Below indicates whether clustering already completed #}
+	{# Below indicates whether pre-processing already completed #}
 	{% include "flash_header.html" %}
 
 	{# Below is the form. #}
-    {% with superForm=psts_form %}
+    {% with superForm=preprocess_form %}
     {% include "superform.html" %}
     {% endwith %}
+    
 	</div>
 </div>
 {% endblock %}

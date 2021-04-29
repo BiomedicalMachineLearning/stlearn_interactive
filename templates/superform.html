@@ -1,102 +1,75 @@
-{% extends 'base.html' %}
+{# Generalised, injectable html for rendering a WTForm generated using:
+	source.forms.forms.createSuperForm()
+#}
 
 {% block content %}
-	{# Below block indicates whether pre-processing already completed #}
-	{% if preprocessed %}
-	<div class="container">
-	    {% for message in get_flashed_messages() %}
-	    <div class="alert alert-warning">
-	        <button type="button" class="close" data-dismiss="alert">&times;</button>
-	        {{ message }}
-	    </div>
-	    {% endfor %}
-
-	    {% block page_content %}{% endblock %}
-	</div>
-	{% endif %}
-
+<div>
 	{# Pre-processing form #}
-    <div class="card">
-       <div class="card-header card-header-primary">
-            <h4 class="card-title">Preprocessing</h4>
-       </div>
-       <div class="card-body">
-            <form id="registerForm" class="form form-register" method="POST" action="" role="form">
-               {{ superForm.csrf_token }}
-                {# Iterating through and adding each element appropriately #}
-                {% for element in superForm.elements %}
+	<form id="registerForm" class="form form-register"
+	      method="POST" action="" role="form" enctype="multipart/form-data">
+           {{ superForm.csrf_token }}
+		   {{ superForm.hidden_tag() }}
 
-                    {# Determining Field type #}
-                    {% if superForm['element_fields'][loop.index0] == 'Title' %}
-                        <h3 class="mt-5">{{ element }}</h3>
+            {# Iterating through and adding each element appropriately #}
+            {% for element in superForm.elements %}
 
-                    {% elif superForm['element_fields'][loop.index0] == 'SelectMultipleField' %}
-                        {# Staggering so appears side-by-side #}
-                        {% if superForm[element+'_number']%2 != 0 %}
+                {# Determining Field type #}
+                {% if superForm['element_fields'][loop.index0] == 'Title' %}
+                    <h3 class="mt-5">{{ element }}</h3>
 
-                            <div style="width: 300px; float: left;" class="form_group">
-                                {{ superForm[element].label }}
-                                {{ superForm[element](class_="form-control") }}
-                            </div>
+				{% elif superForm['element_fields'][loop.index0] == 'SelectMultipleField' %}
+                    <div class="form_group">
+                        {{ superForm[element].label }}
+                        {{ superForm[element](class_="form-control", rows=5, multiple=True) }}
+                    </div>
 
-                        {% else %}
-                            <div style="width: 300px; margin-left: 320px;" class="form_group">
-                                {{ superForm[element].label }}
-                                {{ superForm[element](class_="form-control") }}
-                            </div>
-                        {% endif %}
+				{% elif superForm['element_fields'][loop.index0] == 'SelectField' %}
+                    <div class="form-group">
+                        {{ element }}
+                        {{ superForm[element](class_="form-control")}}
+                    </div>
 
-                    {% elif superForm['element_fields'][loop.index0] == 'StringField' %}
-                        <div class="form-group">
-                            {{ element }}
-                            {{ superForm[element](
-                                      placeholder=superForm[element+'_placeholder'],
-                                                            class_="form-control")}}
-                        </div>
+				{% elif superForm['element_fields'][loop.index0] == 'StringField' %}
+                    <div class="form-group">
+                        {{ element }}
+                        {{ superForm[element](
+                                  placeholder=superForm[element+'_placeholder'],
+                                                        class_="form-control")}}
+                    </div>
 
-                    {% elif superForm['element_fields'][loop.index0] == 'SelectField' %}
-                        <div class="form-group">
-                            {{ element }}
-                            {{ superForm[element](class_="form-control")}}
-                        </div>
+				{% elif superForm['element_fields'][loop.index0] == 'IntegerField' %}
+                    <div class="form-group">
+                        {{ element }}
+                        {{ superForm[element](
+                                  value=superForm[element+'_placeholder'],
+                                                        class_="form-control")}}
+                    </div>
 
-                    {% elif superForm['element_fields'][loop.index0] == 'IntegerField' %}
-                        <div class="form-group">
-                            {{ element }}
-                            {{ superForm[element](
-                                      value=superForm[element+'_placeholder'],
-                                                            class_="form-control")}}
-                        </div>
+				{% elif superForm['element_fields'][loop.index0] == 'BooleanField' %}
+                    <div class="form-group">
+                        {{ element }}
+                        {{ superForm[element](
+                                  checked=superForm[element+'_placeholder'],
+                                                        class_="form-control")}}
+                    </div>
 
-                    {% elif superForm['element_fields'][loop.index0] == 'BooleanField' %}
-                        <div class="form-group">
-                            {{ element }}
-                            {{ superForm[element](
-                                      checked=superForm[element+'_placeholder'],
-                                                            class_="form-control")}}
-                        </div>
+				{% elif superForm['element_fields'][loop.index0] == 'FloatField' %}
+                    <div class="form-group">
+                        {{ element }}
+                        {{ superForm[element](
+                                  value=superForm[element+'_placeholder'],
+                                                        class_="form-control")}}
+                    </div>
 
-                    {% endif %}
-                {% endfor %}
+				{% elif superForm['element_fields'][loop.index0] == 'FileField' %}
+                    {{ element }}
+                    {{ superForm[element] }}
 
-                {# Button which controls form submission #}
-                <p><input class="btn btn-primary" type="submit" value={{"Submit"}}></p>
-            </form>
-       </div>
-    </div>
-	
-{% endblock %}
+                {% endif %}
+            {% endfor %}
 
-{% block status %}
-
-    {% for key, value in step_log.items() %}
-        {% if 'preprocessed_params' != key %}
-            {% if value[0] %}
-                <li class="list-group-item"><span class="badge badge-pill badge-success">Success</span> {{ value[1] }} </li>
-            {% else %}
-                <li class="list-group-item"><span class="badge badge-pill badge-danger">None</span> {{ value[1] }} </li>
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-
+		{# Button which controls form submission #}
+		<p><input class="btn btn-primary" type="submit" value={{"Submit"}}></p>
+	</form>
+</div>
 {% endblock %}
