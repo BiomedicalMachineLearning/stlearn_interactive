@@ -2,6 +2,7 @@
 """
 from wtforms.validators import ValidationError
 
+
 class CheckNumberRange(object):
     def __init__(self, lower, upper, hint=""):
         self.lower = lower
@@ -16,6 +17,3 @@ class CheckNumberRange(object):
                     raise ValidationError(self.hint)
                 else:
                     raise ValidationError("Not in correct range")
-
-
-

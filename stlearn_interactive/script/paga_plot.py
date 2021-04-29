@@ -100,13 +100,19 @@ def make_paga_plot(data, use_label):
     a.axis("off")
     fig.set_size_inches(5, 5)
 
-    filelist = [f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png")]
+    filelist = [
+        f for f in os.listdir("stlearn_interactive/static/") if f.endswith(".png")
+    ]
     for f in filelist:
         os.remove(os.path.join("stlearn_interactive/static/", f))
 
-    fig.savefig("stlearn_interactive/static/tmp.png", dpi=150, bbox_inches="tight", pad_inches=0)
+    fig.savefig(
+        "stlearn_interactive/static/tmp.png", dpi=150, bbox_inches="tight", pad_inches=0
+    )
 
-    paga = Div(text="""<img src='stlearn_interactive/static/tmp.png' style='float: left;'>""")
+    paga = Div(
+        text="""<img src='stlearn_interactive/static/tmp.png' style='float: left;'>"""
+    )
 
     fig2, a2 = plt.subplots()
 
@@ -123,7 +129,12 @@ def make_paga_plot(data, use_label):
     a2.axis("off")
     fig2.set_size_inches(5, 5)
 
-    fig2.savefig("stlearn_interactive/static/tmp2.png", dpi=150, bbox_inches="tight", pad_inches=0)
+    fig2.savefig(
+        "stlearn_interactive/static/tmp2.png",
+        dpi=150,
+        bbox_inches="tight",
+        pad_inches=0,
+    )
 
     fa2 = Div(text="""<img src='stlearn_interactive/static/tmp2.png'>""")
 
