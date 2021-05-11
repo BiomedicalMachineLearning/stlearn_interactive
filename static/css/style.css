@@ -48,3 +48,25 @@ a.disabled, fieldset:disabled a {
 #Cluster\ Select {
     height: 150px
 }
+
+#overlay { width:100px;
+    height: 100px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: -1;
+}
+
+#loading { width:100px;
+    height: 200px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+}
+
+.btn, .btn.btn-default {
+    color: #fff;
+    background-color: #9124a3;
+    border-color: #9c27b0;
+    box-shadow: 0 2px 2px 0 hsl(0deg 0% 60% / 14%), 0 3px 1px -2px hsl(0deg 0% 60% / 20%), 0 1px 5px 0 hsl(0deg 0% 60% / 12%);
+}

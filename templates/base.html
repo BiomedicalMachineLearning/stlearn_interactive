@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>{% block title %}{% endblock %}</title>
+  <title>stLearn</title>
   <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='/img/favicon.png') }}"/>
   {% block resource %}
 
@@ -23,7 +23,7 @@
 
 <body>
 
-  
+
 
   <div class="wrapper ">
      <!--
@@ -92,6 +92,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" id="annotate_plot" href="/annotate_plot">
+              <i class="material-icons">mode_edit</i>
+              <p>Annotation plot</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link disabled" id="cluster_plot" href="/cluster_plot">
               <i class="material-icons">analytics</i>
               <p>Cluster plot</p>
@@ -112,7 +118,6 @@
         <div class="container-fluid">
           {% block content %}
         {% endblock %}
-
 
         </div>
       </div>
@@ -140,7 +145,7 @@
     </div>
   </div>
 
-  
+
 
 
 <!--   Core JS Files   -->
@@ -172,7 +177,9 @@
 
 </script>
 
-
+<script type="text/javascript">
+  $("#overlay").fadeOut(10000);
+</script>
 
   {% block javascript %}
     {% endblock %}

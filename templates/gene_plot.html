@@ -7,6 +7,11 @@
    </div>
    <div class="card-body">
 		{{ script|safe }}
+
+		<div id="overlay">
+         <img src="{{ url_for('static', filename='img/loading_gif.gif') }}" alt="Loading" />
+         Loading plot...
+        </div>
    </div>
 </div>
 
