@@ -217,10 +217,10 @@ def save_adata():
         return send_file(path, as_attachment=True, attachment_filename="adata.h5ad")
 
 
-import stlearn as st
-import scanpy as sc
+# import stlearn as st
+# import scanpy as sc
 
-adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
+# adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
 # sc.pp.normalize_total(adata)
