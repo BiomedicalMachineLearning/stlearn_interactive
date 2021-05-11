@@ -1,8 +1,18 @@
-from flask import Flask, render_template, request, flash, url_for, redirect, session
+from flask import (
+    Flask,
+    render_template,
+    request,
+    flash,
+    url_for,
+    redirect,
+    session,
+    send_file,
+)
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from werkzeug.utils import secure_filename
+import tempfile
 
 import os, sys
 import stlearn
@@ -187,17 +197,30 @@ def cci_plot():
     )
 
 
-@app.route("/reset_session", methods=["POST"])
-def reset_session():
-    # Moving forward code
-    session.clear()
-    return redirect(url_for("index"))
+@app.route("/annotate_plot")
+def annotate_plot():
+    script = server_document("http://127.0.0.1:5006/bokeh_annotate_plot")
+    return render_template(
+        "annotate_plot.html",
+        script=script,
+        template="Flask",
+        relative_urls=False,
+        step_log=step_log,
+    )
 
 
-# import stlearn as st
-# import scanpy as sc
+@app.route("/save_adata", methods=["POST"])
+def save_adata():
+    if request.method == "POST":
+        fd, path = tempfile.mkstemp()
+        adata.write_h5ad(path)
+        return send_file(path, as_attachment=True, attachment_filename="adata.h5ad")
 
-# adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
+
+import stlearn as st
+import scanpy as sc
+
+adata = st.Read10X("/home/d.pham/10X/TBI_C1/")
 # adata.raw = adata
 # sc.pp.filter_genes(adata,min_cells=3)
 # sc.pp.normalize_total(adata)
@@ -220,72 +243,88 @@ def reset_session():
 # st.pl.cluster_plot(adata,use_label="leiden",show_plot=False)
 
 
-# def modify_doc_gene_plot(doc):
-#     from stlearn.plotting.classes_bokeh import BokehGenePlot
+def modify_doc_gene_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehGenePlot
 
-#     gp_object = BokehGenePlot(adata)
-#     doc.add_root(row(gp_object.layout, width=800))
+    gp_object = BokehGenePlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
 
-#     gp_object.data_alpha.on_change("value", gp_object.update_data)
-#     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-#     gp_object.spot_size.on_change("value", gp_object.update_data)
-#     gp_object.gene_select.on_change("value", gp_object.update_data)
-
-
-# def modify_doc_cluster_plot(doc):
-#     from stlearn.plotting.classes_bokeh import BokehClusterPlot
-
-#     gp_object = BokehClusterPlot(adata, use_label="clusters")
-#     doc.add_root(row(gp_object.layout, width=800))
-
-#     gp_object.data_alpha.on_change("value", gp_object.update_data)
-#     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-#     gp_object.spot_size.on_change("value", gp_object.update_data)
-#     gp_object.list_cluster.on_change("active", gp_object.update_data)
-#     gp_object.checkbox_group.on_change("active", gp_object.update_data)
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)
+    gp_object.gene_select.on_change("value", gp_object.update_data)
 
 
-# def modify_doc_cci_plot(doc):
-#     from stlearn.plotting.classes_bokeh import BokehCciPlot
+def modify_doc_cluster_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehClusterPlot
 
-#     gp_object = BokehCciPlot(adata)
-#     doc.add_root(row(gp_object.layout, width=800))
+    gp_object = BokehClusterPlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
 
-#     gp_object.data_alpha.on_change("value", gp_object.update_data)
-#     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-#     gp_object.spot_size.on_change("value", gp_object.update_data)
-#     gp_object.het_select.on_change("value", gp_object.update_data)
-
-
-# # App for gene_plot
-# bkapp = Application(FunctionHandler(modify_doc_gene_plot))
-
-# # App for cluster_plot
-# bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
-
-# # App for cci_plot
-# bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
+    gp_object.use_label.on_change("value", gp_object.update_list)
+    gp_object.use_label.on_change("value", gp_object.update_data)
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)
+    gp_object.list_cluster.on_change("active", gp_object.update_data)
+    gp_object.checkbox_group.on_change("active", gp_object.update_data)
 
 
-# def bk_worker():
-#     asyncio.set_event_loop(asyncio.new_event_loop())
+def modify_doc_cci_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehCciPlot
 
-#     server = Server(
-#         {
-#             "/bokeh_gene_plot": bkapp,
-#             "/bokeh_cluster_plot": bkapp2,
-#             "/bokeh_cci_plot": bkapp3,
-#         },
-#         io_loop=IOLoop(),
-#         allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
-#     )
-#     server.start()
-#     server.io_loop.start()
+    gp_object = BokehCciPlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
+
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)
+    gp_object.het_select.on_change("value", gp_object.update_data)
 
 
-# from threading import Thread
+def modify_doc_annotate_plot(doc):
+    from stlearn.plotting.classes_bokeh import Annotate
 
-# Thread(target=bk_worker).start()
+    gp_object = Annotate(adata)
+    doc.add_root(row(gp_object.layout, width=800))
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)
+
+
+# App for gene_plot
+bkapp = Application(FunctionHandler(modify_doc_gene_plot))
+
+# App for cluster_plot
+bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
+
+# App for cci_plot
+bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
+
+# App for annotate_plot
+bkapp4 = Application(FunctionHandler(modify_doc_annotate_plot))
+
+
+def bk_worker():
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
+    server = Server(
+        {
+            "/bokeh_gene_plot": bkapp,
+            "/bokeh_cluster_plot": bkapp2,
+            "/bokeh_cci_plot": bkapp3,
+            "/bokeh_annotate_plot": bkapp4,
+        },
+        io_loop=IOLoop(),
+        allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
+    )
+    server.start()
+    server.io_loop.start()
+
+
+from threading import Thread
+
+Thread(target=bk_worker).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5005, debug=True)
