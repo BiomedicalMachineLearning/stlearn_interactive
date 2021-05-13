@@ -9,35 +9,27 @@
    </div>
    <div class="card-body">
 		<div class="frame">
-	<form action = "http://localhost:5000/uploader" method = "POST" enctype = "multipart/form-data" class = "center">
-		<div class="title">
-			<h1>Open Visium data</h1>
+			<form action = "http://localhost:5000/uploader" method = "POST" enctype = "multipart/form-data" class = "center">
+				<div class="title">
+					<h1>Open Visium data</h1>
+				</div>
+
+				<div class="dropzone">
+					<input type="file" webkitdirectory mozdirectory name = "file" class="upload-input" id="customFile" />
+				</div>
+
+				<button type="submit" class="btn" name="uploadbutton" onclick="$('#loading').show();">Upload folder</button>
+
+			</form>
+			<div id="loading" style="display:none;"> Loading data...<img src="{{ url_for('static', filename='img/loading_gif.gif') }}" alt=""/></div>
 		</div>
-
-		<div class="dropzone">
-			<input type="file" webkitdirectory mozdirectory name = "file" class="upload-input" id="customFile" />
-		</div>
-
-		<button type="submit" class="btn" name="uploadbutton" onclick="$('#loading').show();">Upload folder</button>
-
-	</form>
-	<div id="loading" style="display:none;"> Loading data...<img src="{{ url_for('static', filename='img/loading_gif.gif') }}" alt=""/></div>
-</div>
 
 
    </div>
    <div class="card-footer">
 
 
-	{% with messages = get_flashed_messages() %}
-	  {% if messages %}
-	    <ul class=flashes>
-	    {% for message in messages %}
-	      <li>{{ message }}</li>
-	    {% endfor %}
-	    </ul>
-	  {% endif %}
-	{% endwith %}
+	{% include "flash_header.html" %}
 	   </div>
 </div>
 

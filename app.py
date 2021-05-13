@@ -13,6 +13,7 @@ from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from werkzeug.utils import secure_filename
 import tempfile
+import traceback
 
 import os, sys
 import stlearn
@@ -71,7 +72,7 @@ def index():
 
 @app.route("/upload")
 def upload():
-    return render_template("upload.html", step_log=step_log)
+    return render_template("upload.html", step_log=step_log, flash_bool=True)
 
 
 @app.route("/preprocessing", methods=["GET", "POST"])
@@ -124,15 +125,25 @@ def uploader_file():
 
         # Get list of files from selected folder
         files = request.files.getlist("file")
+
         os.mkdir(os.path.join(app.config["UPLOAD_FOLDER"], "spatial"))
+
+        # allow_upload_files = list(map(lambda x: x ),allow_files)
+
+        uploaded = []
+        i = 0
         for file in files:
+
             filename = secure_filename(file.filename)
+
             if allow_files[0] in filename:
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                 os.rename(
                     os.path.join(app.config["UPLOAD_FOLDER"], filename),
                     os.path.join(app.config["UPLOAD_FOLDER"], allow_files[0]),
                 )
+                uploaded.append(allow_files[0])
+
             for allow_file in allow_files[1:]:
                 if allow_file in filename:
                     file.save(
@@ -147,18 +158,31 @@ def uploader_file():
                         ),
                     )
 
-    flash("File uploaded successfully")
-    global adata, step_log
-    adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
-    adata.var_names_make_unique()  # removing duplicates
-    # ensuring compatible format for CCI, since need _ to pair LRs #
-    adata.var_names = numpy.array(
-        [var_name.replace("_", "-") for var_name in adata.var_names]
-    )
+                    uploaded.append(allow_file)
 
-    step_log["uploaded"][0] = True
+            print(i)
+            i += 1
+            if len(uploaded) == 5:
+                flash("File uploaded successfully")
+                global adata, step_log
+                adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
+                adata.var_names_make_unique()  # removing duplicates
+                # ensuring compatible format for CCI, since need _ to pair LRs #
+                adata.var_names = numpy.array(
+                    [var_name.replace("_", "-") for var_name in adata.var_names]
+                )
 
-    return redirect(url_for("upload"))
+                step_log["uploaded"][0] = True
+
+                return redirect(url_for("upload"))
+
+        if len(uploaded) != 5:
+            missing_files = []
+            for file in allow_files:
+                if file not in uploaded:
+                    missing_files.append(file)
+            flash("Upload ERROR: Missing " + ", ".join(missing_files))
+            return redirect(url_for("upload"))
 
 
 @app.route("/gene_plot")
