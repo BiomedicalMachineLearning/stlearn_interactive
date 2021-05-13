@@ -219,6 +219,9 @@ def run_clustering(request, adata, step_log):
                 st.pp.neighbors(adata, n_neighbors=element_values[5], use_rep="X_pca")
                 st.tl.clustering.louvain(adata, resolution=param, key_added="clusters")
 
+            st.pp.neighbors(adata, n_neighbors=element_values[5], use_rep="X_pca")
+            sc.tl.paga(adata, groups="clusters")
+
             st.pl.cluster_plot(adata, use_label="clusters")
             savePlot("clustering.png")
 
@@ -247,7 +250,12 @@ def run_psts(request, adata, step_log):
     cluster_set = numpy.unique(adata.obs["clusters"].values)
     order = numpy.argsort([int(cluster) for cluster in cluster_set])
     cluster_set = cluster_set[order]
-    PSTSForm = forms.getPSTSForm(cluster_set)
+
+    from .utils import get_all_paths
+
+    trajectory_set = get_all_paths(adata)
+
+    PSTSForm = forms.getPSTSForm(trajectory_set, cluster_set)
     form = PSTSForm(request.form)
 
     step_log["psts_params"] = vhs.getData(form)
@@ -286,7 +294,9 @@ def run_psts(request, adata, step_log):
 
             # Performing the TI #
             print(element_values[-1], file=sys.stdout, flush=True)
-            clusts = [int(clust) for clust in element_values[-1]]
+
+            node_order = element_values[-1].split(" - ")
+
             st.spatial.trajectory.pseudotime(
                 adata,
                 eps=element_values[2],
@@ -294,15 +304,16 @@ def run_psts(request, adata, step_log):
                 use_label="clusters",
                 reverse=element_values[1],
             )
+            print(node_order)
             st.spatial.trajectory.pseudotimespace_global(
-                adata, use_label="clusters", list_clusters=clusts
+                adata, use_label="clusters", list_clusters=node_order
             )
 
             st.pl.cluster_plot(
                 adata,
                 use_label="clusters",
                 show_trajectories=True,
-                list_clusters=clusts,
+                list_clusters=node_order,
                 show_subcluster=True,
             )
             savePlot("trajectory_inference.png")
