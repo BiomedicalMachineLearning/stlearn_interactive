@@ -11,26 +11,20 @@ Install stlearn dev version by:
 
 ``` python setup.py install ```
 
+
 ## Step 2:
-
-Install bokeh by https://docs.bokeh.org/en/latest/docs/installation.html:
-
-``` pip install bokeh ```
-
-## Step 3:
 
 Clone stlearn interactive app:
 
 ``` git clone https://github.com/BiomedicalMachineLearning/stlearn_interactive.git ```
 
-## Step 4:
-
-Run the stlearn app:
-
 ``` cd stlearn_interactive ```
 
-``` bokeh serve --show stlearn_interactive ```
+``` pip install -r requirements.txt ```
 
-# Tutorial:
+## Step 3:
 
-Please open wiki page for the tutorial: [Wiki](https://github.com/BiomedicalMachineLearning/stlearn_interactive/wiki/stLearn-interactive-tutorial)
+Run the stlearn interactive app:
+
+``` FLASK_APP=app.py FLASK_ENV=development flask run ```
+
