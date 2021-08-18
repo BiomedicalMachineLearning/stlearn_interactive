@@ -17,6 +17,7 @@ import traceback
 
 import os, sys
 import stlearn
+import scanpy
 import numpy
 
 import asyncio
@@ -40,7 +41,7 @@ global adata  # Storing the data
 adata = None
 global step_log  # Keeps track of what step we're up to (performed preprocessing?)
 step_log = {
-    "uploaded": [True, "Upload file"],
+    "uploaded": [False, "Upload file"],
     "preprocessed": [False, "Preprocessing"],
     "clustering": [False, "Clustering"],
     "psts": [False, "Spatial trajectory"],
@@ -112,8 +113,8 @@ allow_files = [
 ]
 
 
-@app.route("/uploader", methods=["GET", "POST"])
-def uploader_file():
+@app.route("/folder_uploader", methods=["GET", "POST"])
+def folder_uploader():
     if request.method == "POST":
         # Clean uploads folder before upload a new data
         import shutil
@@ -165,6 +166,18 @@ def uploader_file():
             if len(uploaded) == 5:
                 flash("File uploaded successfully")
                 global adata, step_log
+                step_log = {
+                    "uploaded": [True, "Upload file"],
+                    "preprocessed": [False, "Preprocessing"],
+                    "clustering": [False, "Clustering"],
+                    "psts": [False, "Spatial trajectory"],
+                    "cci": [False, "Cell-cell interaction"],
+                    # _params suffix important for templates/progress.html
+                    "preprocessed_params": {},
+                    "cci_params": {},
+                    "cluster_params": {},
+                    "psts_params": {},
+                }
                 adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
                 adata.var_names_make_unique()  # removing duplicates
                 # ensuring compatible format for CCI, since need _ to pair LRs #
@@ -183,6 +196,79 @@ def uploader_file():
                     missing_files.append(file)
             flash("Upload ERROR: Missing " + ", ".join(missing_files))
             return redirect(url_for("upload"))
+
+
+@app.route("/file_uploader", methods=["GET", "POST"])
+def file_uploader():
+    if request.method == "POST":
+
+        global adata, step_log
+
+        # Clean uploads folder before upload a new data
+        import shutil
+
+        shutil.rmtree(app.config["UPLOAD_FOLDER"])
+        os.makedirs(app.config["UPLOAD_FOLDER"])
+        open(app.config["UPLOAD_FOLDER"] + "/.gitkeep", "a").close()
+        # os.mknod()
+        f = request.files["file"]
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+        try:
+            adata = scanpy.read_h5ad(app.config["UPLOAD_FOLDER"] + "/" + f.filename)
+        except:
+            flash("Upload ERROR: Please choose the right AnnData file ")
+
+        step_log["uploaded"][0] = True
+
+        if "n_cells" in adata.var.columns:
+            step_log["preprocessed"][0] = True
+
+        for col in adata.obs.columns:
+            if adata.obs[col].dtype.name == "category":
+                if col != "sub_cluster_labels":
+                    step_log["clustering"][0] = True
+
+        if "global_graph" in adata.uns:
+            step_log["psts"][0] = True
+
+        menu = 0
+        for col in adata.obs.columns:
+            if adata.obs[col].dtype.name == "category":
+                menu += 1
+
+        if menu > 0:
+            return redirect(url_for("choose_cluster"))
+        else:
+            return redirect(url_for("upload"))
+
+
+@app.route("/choose_cluster", methods=["GET", "POST"])
+def choose_cluster():
+    menu = []
+
+    for col in adata.obs.columns:
+        if adata.obs[col].dtype.name == "category":
+            if col != "sub_cluster_labels":
+                menu.append(col)
+
+    return render_template(
+        "choose_cluster.html",
+        template="Flask",
+        relative_urls=False,
+        step_log=step_log,
+        menu=menu,
+    )
+
+
+@app.route("/convert_clusters", methods=["GET", "POST"])
+def convert_clusters():
+    if request.method == "POST":
+        adata.obs["clusters"] = adata.obs[request.form["convert_clusters"]]
+        scanpy.tl.paga(adata, groups="clusters")
+        stlearn.pl.cluster_plot(adata, use_label="clusters")
+
+        return redirect(url_for("psts"))
 
 
 @app.route("/gene_plot")
@@ -237,8 +323,15 @@ def annotate_plot():
 def save_adata():
     if request.method == "POST":
         fd, path = tempfile.mkstemp()
+        from datetime import datetime
+
+        now = datetime.now()
+        date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
+
         adata.write_h5ad(path)
-        return send_file(path, as_attachment=True, attachment_filename="adata.h5ad")
+        return send_file(
+            path, as_attachment=True, attachment_filename="adata_" + date_time + ".h5ad"
+        )
 
 
 # import stlearn as st
@@ -252,7 +345,7 @@ def save_adata():
 # sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
 # adata = adata[:, adata.var.highly_variable]
 
-# sc.pp.scale(adata)
+# sc.pp.scale(adata)g
 
 # adata.uns["lr"] = ['Gfap_Ctss']
 # st.tl.cci.lr(adata=adata)
@@ -277,6 +370,9 @@ def modify_doc_gene_plot(doc):
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
     gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.gene_select.on_change("value", gp_object.update_data)
+    gp_object.cmap_select.on_change("value", gp_object.update_data)
+    gp_object.use_label.on_change("value", gp_object.update_data)
+    gp_object.output_backend.on_change("value", gp_object.update_data)
 
 
 def modify_doc_cluster_plot(doc):
@@ -292,6 +388,7 @@ def modify_doc_cluster_plot(doc):
     gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.list_cluster.on_change("active", gp_object.update_data)
     gp_object.checkbox_group.on_change("active", gp_object.update_data)
+    gp_object.output_backend.on_change("value", gp_object.update_data)
 
 
 def modify_doc_cci_plot(doc):
@@ -304,6 +401,7 @@ def modify_doc_cci_plot(doc):
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
     gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.het_select.on_change("value", gp_object.update_data)
+    gp_object.output_backend.on_change("value", gp_object.update_data)
 
 
 def modify_doc_annotate_plot(doc):
@@ -351,4 +449,4 @@ from threading import Thread
 Thread(target=bk_worker).start()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5005, debug=True)
+    app.run(host="0.0.0.0", port=5005, debug=True, use_reloader=True)
