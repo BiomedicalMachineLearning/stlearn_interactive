@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>stLearn</title>
+  <title>stLearn - Interactive App version</title>
   <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='/img/favicon.png') }}"/>
   {% block resource %}
 
@@ -92,7 +92,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="annotate_plot" href="/annotate_plot">
+            <a class="nav-link disabled" id="annotate_plot" href="/annotate_plot">
               <i class="material-icons">mode_edit</i>
               <p>Annotation plot</p>
             </a>
@@ -173,12 +173,13 @@
     {% if step_log.uploaded[0] %}
       $( "#preprocessing" ).removeClass( "disabled" )
       $( "#gene_plot" ).removeClass( "disabled" )
+      $( "#annotate_plot" ).removeClass( "disabled" )
     {% endif %}
 
 </script>
 
 <script type="text/javascript">
-  $("#overlay").fadeOut(10000);
+  $("#overlay").fadeOut(1000000);
 </script>
 
   {% block javascript %}

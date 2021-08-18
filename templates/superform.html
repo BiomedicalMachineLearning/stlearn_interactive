@@ -69,7 +69,8 @@
             {% endfor %}
 
 		{# Button which controls form submission #}
-		<p><input class="btn btn-primary" type="submit" value={{"Submit"}}></p>
+		<p><input class="btn btn-primary" type="submit" onclick="$('#loading').show();" value={{"Submit"}}></p>
 	</form>
+    <div id="loading" style="display:none;"> Processing...<img src="{{ url_for('static', filename='img/Settings.gif') }}" alt=""/></div>
 </div>
 {% endblock %}
