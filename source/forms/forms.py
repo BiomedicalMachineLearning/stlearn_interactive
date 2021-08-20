@@ -189,7 +189,7 @@ def getClusterForm():
         "Cluster method",
         "K",
         "Resolution",
-        "Neighbours (for Louvain)",
+        "Neighbours (for Louvain/Leiden)",
     ]
     element_fields = [
         "IntegerField",
@@ -202,7 +202,7 @@ def getClusterForm():
     element_values = [
         50,
         True,
-        [("KMeans", "KMeans"), ("Louvain", "Louvain")],
+        [("KMeans", "KMeans"), ("Louvain", "Louvain"), ("Leiden", "Leiden")],
         10,
         1.0,
         15,
@@ -234,6 +234,26 @@ def getPSTSForm(trajectory, clusts):
     ]
 
     element_values = [clusts, False, 50, trajectory]
+    return createSuperForm(elements, element_fields, element_values)
+
+
+def getDEAForm(list_labels, methods):
+    """Gets the psts form generated using superform above.
+
+    Args:
+            cluster_set (numpy.array<str>): The clusters which can be selected as
+                                                                            the root for psts analysis.
+
+    Returns:
+            FlaskForm: With attributes that allow input related to psts.
+    """
+    elements = ["Use label", "Use method"]
+    element_fields = [
+        "SelectField",
+        "SelectField",
+    ]
+
+    element_values = [list_labels, methods]
     return createSuperForm(elements, element_fields, element_values)
 
 

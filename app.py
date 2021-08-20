@@ -46,11 +46,13 @@ step_log = {
     "clustering": [False, "Clustering"],
     "psts": [False, "Spatial trajectory"],
     "cci": [False, "Cell-cell interaction"],
+    "dea": [False, "DEA"],
     # _params suffix important for templates/progress.html
     "preprocessed_params": {},
     "cci_params": {},
     "cluster_params": {},
     "psts_params": {},
+    "dea_params": {},
 }
 
 # print(stlearn, file=sys.stdout)
@@ -100,7 +102,18 @@ def cci():
 @app.route("/psts", methods=["GET", "POST"])
 def psts():
     global adata, step_log
-    updated_page = views.run_psts(request, adata, step_log)
+
+    if "clusters" not in adata.obs.columns:
+        return redirect(url_for("choose_cluster"))
+    else:
+        updated_page = views.run_psts(request, adata, step_log)
+        return updated_page
+
+
+@app.route("/dea", methods=["GET", "POST"])
+def dea():
+    global adata, step_log
+    updated_page = views.run_dea(request, adata, step_log)
     return updated_page
 
 
@@ -167,16 +180,18 @@ def folder_uploader():
                 flash("File uploaded successfully")
                 global adata, step_log
                 step_log = {
-                    "uploaded": [True, "Upload file"],
+                    "uploaded": [False, "Upload file"],
                     "preprocessed": [False, "Preprocessing"],
                     "clustering": [False, "Clustering"],
                     "psts": [False, "Spatial trajectory"],
                     "cci": [False, "Cell-cell interaction"],
+                    "dea": [False, "Differential expression analysis"],
                     # _params suffix important for templates/progress.html
                     "preprocessed_params": {},
                     "cci_params": {},
                     "cluster_params": {},
                     "psts_params": {},
+                    "dea_params": {},
                 }
                 adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
                 adata.var_names_make_unique()  # removing duplicates
@@ -232,15 +247,7 @@ def file_uploader():
         if "global_graph" in adata.uns:
             step_log["psts"][0] = True
 
-        menu = 0
-        for col in adata.obs.columns:
-            if adata.obs[col].dtype.name == "category":
-                menu += 1
-
-        if menu > 0:
-            return redirect(url_for("choose_cluster"))
-        else:
-            return redirect(url_for("upload"))
+        return redirect(url_for("upload"))
 
 
 @app.route("/choose_cluster", methods=["GET", "POST"])
@@ -371,7 +378,9 @@ def modify_doc_gene_plot(doc):
     gp_object.spot_size.on_change("value", gp_object.update_data)
     gp_object.gene_select.on_change("value", gp_object.update_data)
     gp_object.cmap_select.on_change("value", gp_object.update_data)
-    gp_object.use_label.on_change("value", gp_object.update_data)
+
+    if len(gp_object.menu) != 0:
+        gp_object.use_label.on_change("value", gp_object.update_data)
     gp_object.output_backend.on_change("value", gp_object.update_data)
 
 

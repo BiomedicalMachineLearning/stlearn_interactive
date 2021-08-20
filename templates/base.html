@@ -86,6 +86,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link disabled" id="dea" href="/dea">
+              <i class="material-icons">group_work</i>
+              <p>DEA analysis</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link disabled" id="gene_plot" href="/gene_plot">
               <i class="material-icons">lens_blur</i>
               <p>Gene plot</p>
@@ -163,6 +169,7 @@
     {% if step_log.clustering[0] %}
       $( "#psts" ).removeClass( "disabled" )
       $( "#cluster_plot" ).removeClass( "disabled" )
+      $( "#dea" ).removeClass( "disabled" )
     {% endif %}
 
     {% if step_log.preprocessed[0] %}

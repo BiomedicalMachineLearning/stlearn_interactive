@@ -64,7 +64,7 @@ def run_preprocessing(request, adata, step_log):
         step_log["preprocessed"][0] = True
 
     if step_log["preprocessed"][0]:
-        flash("Preprocessing completed!")
+        flash("Preprocessing is completed!")
 
     updated_page = render_template(
         "preprocessing.html",
@@ -155,7 +155,7 @@ def run_cci(request, adata, step_log):
 
             step_log["cci"][0] = True
 
-            flash("CCI analysis completed!")
+            flash("CCI analysis is completed!")
 
         except Exception as msg:
             traceback.print_exc(file=sys.stdout)
@@ -210,23 +210,30 @@ def run_clustering(request, adata, step_log):
             # Performing the clustering on the PCA #
             if element_values[2] == "KMeans":  # KMeans
                 param = int(element_values[3])
-                st.tl.clustering.kmeans(
-                    adata, n_clusters=param, use_data="X_pca", key_added="clusters"
-                )
+                st.tl.clustering.kmeans(adata, n_clusters=param, use_data="X_pca")
 
-            else:  # Louvain
+                st.pp.neighbors(adata, n_neighbors=element_values[5], use_rep="X_pca")
+                sc.tl.paga(adata, groups="kmeans")
+                st.pl.cluster_plot(adata, use_label="kmeans")
+
+            elif element_values[2] == "Louvain":  # Louvain
                 param = element_values[4]
                 st.pp.neighbors(adata, n_neighbors=element_values[5], use_rep="X_pca")
-                st.tl.clustering.louvain(adata, resolution=param, key_added="clusters")
+                st.tl.clustering.louvain(adata, resolution=param)
+                sc.tl.paga(adata, groups="louvain")
+                st.pl.cluster_plot(adata, use_label="louvain")
 
-            st.pp.neighbors(adata, n_neighbors=element_values[5], use_rep="X_pca")
-            sc.tl.paga(adata, groups="clusters")
+            else:  # Leiden
+                param = element_values[4]
+                st.pp.neighbors(adata, n_neighbors=element_values[5], use_rep="X_pca")
+                sc.tl.leiden(adata, resolution=param)
+                sc.tl.paga(adata, groups="leiden")
+                st.pl.cluster_plot(adata, use_label="leiden")
 
-            st.pl.cluster_plot(adata, use_label="clusters")
             savePlot("clustering.png")
 
             step_log["clustering"][0] = True
-            flash("Clustering completed!")
+            flash("Clustering is completed!")
 
         except Exception as msg:
             traceback.print_exc(file=sys.stdout)
@@ -272,16 +279,6 @@ def run_psts(request, adata, step_log):
 
     else:
         try:
-            # Getting root spot position as one closest to median location for
-            # cluster #
-            # cluster_spots = adata.obs['clusters'].values == element_values[0]
-            # spot_locs = adata.obs.iloc[:,1:3].loc[cluster_spots,:]
-            # median = [numpy.median(spot_locs.values[:,0]),
-            # 		  numpy.median(spot_locs.values[:,1])]
-            # med_dists = numpy.apply_along_axis(cosine, 1,
-            # 								   spot_locs.values, median)
-            # min_dist = min(med_dists)
-            # root_name = spot_locs.index.values[med_dists==min_dist][0]
             from stlearn.spatials.trajectory import set_root
 
             root_index = set_root(
@@ -319,7 +316,7 @@ def run_psts(request, adata, step_log):
             savePlot("trajectory_inference.png")
 
             step_log["psts"][0] = True
-            flash("Trajectory inference completed!")
+            flash("Trajectory inference is completed!")
 
         except Exception as msg:
             traceback.print_exc(file=sys.stdout)
@@ -330,6 +327,57 @@ def run_psts(request, adata, step_log):
         "psts.html",
         title=step_log["psts"][1],
         psts_form=form,
+        flash_bool=True,
+        step_log=step_log,
+    )
+
+    return updated_page
+
+
+def run_dea(request, adata, step_log):
+
+    list_labels = []
+
+    for col in adata.obs.columns:
+        if adata.obs[col].dtype.name == "category":
+            if col != "sub_cluster_labels":
+                list_labels.append(col)
+
+    list_labels = numpy.array(list_labels)
+
+    methods = numpy.array(["logreg", "t-test", "wilcoxon", "t-test_overestim_var"])
+
+    DEAForm = forms.getDEAForm(list_labels, methods)
+    form = DEAForm(request.form)
+
+    step_log["dea_params"] = vhs.getData(form)
+    print(step_log["dea_params"], file=sys.stdout)
+    elements = list(step_log["dea_params"].keys())
+    element_values = list(step_log["dea_params"].values())
+
+    if not form.validate_on_submit():
+        flash_errors(form)
+
+    elif type(adata) == type(None):
+        flash("Need to load data first!")
+
+    else:
+        try:
+
+            sc.tl.rank_genes_groups(adata, element_values[0], method=element_values[1])
+
+            step_log["dea"][0] = True
+            flash("Differential expression analysis is completed!")
+
+        except Exception as msg:
+            traceback.print_exc(file=sys.stdout)
+            flash("Analysis ERROR: " + str(msg))
+            print(msg)
+
+    updated_page = render_template(
+        "dea.html",
+        title=step_log["dea"][1],
+        dea_form=form,
         flash_bool=True,
         step_log=step_log,
     )
