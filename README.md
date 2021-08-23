@@ -26,5 +26,5 @@ Clone stlearn interactive app:
 
 Run the stlearn interactive app:
 
-``` FLASK_APP=app.py FLASK_ENV=development flask run ```
+``` FLASK_APP=app.py flask run ```
 
