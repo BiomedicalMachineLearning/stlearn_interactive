@@ -210,7 +210,7 @@ def getClusterForm():
     return createSuperForm(elements, element_fields, element_values)
 
 
-def getPSTSForm(trajectory, clusts):
+def getPSTSForm(trajectory, clusts, options):
     """Gets the psts form generated using superform above.
 
     Args:
@@ -225,15 +225,17 @@ def getPSTSForm(trajectory, clusts):
         "Reverse",
         "eps (max. dist. spot neighbourhood)",
         "Trajectory Select",
+        "Select distance-based method",
     ]
     element_fields = [
         "SelectField",
         "BooleanField",
         "IntegerField",
         "SelectField",
+        "SelectField",
     ]
 
-    element_values = [clusts, False, 50, trajectory]
+    element_values = [clusts, False, 50, trajectory, options]
     return createSuperForm(elements, element_fields, element_values)
 
 

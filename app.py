@@ -398,6 +398,11 @@ def modify_doc_cluster_plot(doc):
     gp_object.list_cluster.on_change("active", gp_object.update_data)
     gp_object.checkbox_group.on_change("active", gp_object.update_data)
     gp_object.output_backend.on_change("value", gp_object.update_data)
+    if "rank_genes_groups" in adata.uns:
+        gp_object.n_top_genes.on_change("value", gp_object.update_data)
+        gp_object.cmap_select.on_change("value", gp_object.update_data)
+        gp_object.plot_select.on_change("value", gp_object.update_data)
+        gp_object.min_logfoldchange.on_change("value", gp_object.update_data)
 
 
 def modify_doc_cci_plot(doc):

@@ -258,11 +258,13 @@ def run_psts(request, adata, step_log):
     order = numpy.argsort([int(cluster) for cluster in cluster_set])
     cluster_set = cluster_set[order]
 
+    options = ["Auto", "Spatial distance only", "Gene expression distance only"]
+
     from .utils import get_all_paths
 
     trajectory_set = get_all_paths(adata)
 
-    PSTSForm = forms.getPSTSForm(trajectory_set, cluster_set)
+    PSTSForm = forms.getPSTSForm(trajectory_set, cluster_set, options)
     form = PSTSForm(request.form)
 
     step_log["psts_params"] = vhs.getData(form)
@@ -270,6 +272,13 @@ def run_psts(request, adata, step_log):
     elements = list(step_log["psts_params"].keys())
     # order: pca_comps, SME bool, method, method_param
     element_values = list(step_log["psts_params"].values())
+
+    if element_values[4] == "Auto":
+        w = None
+    elif element_values[4] == "Spatial distance only":
+        w = 0
+    else:
+        w = 1
 
     if not form.validate_on_submit():
         flash_errors(form)
@@ -290,9 +299,9 @@ def run_psts(request, adata, step_log):
             print(root_index, file=sys.stdout, flush=True)
 
             # Performing the TI #
-            print(element_values[-1], file=sys.stdout, flush=True)
+            print(element_values[3], file=sys.stdout, flush=True)
 
-            node_order = element_values[-1].split(" - ")
+            node_order = element_values[3].split(" - ")
 
             st.spatial.trajectory.pseudotime(
                 adata,
@@ -303,7 +312,7 @@ def run_psts(request, adata, step_log):
             )
             print(node_order)
             st.spatial.trajectory.pseudotimespace_global(
-                adata, use_label="clusters", list_clusters=node_order
+                adata, use_label="clusters", list_clusters=node_order, w=w
             )
 
             st.pl.cluster_plot(
@@ -345,7 +354,7 @@ def run_dea(request, adata, step_log):
 
     list_labels = numpy.array(list_labels)
 
-    methods = numpy.array(["logreg", "t-test", "wilcoxon", "t-test_overestim_var"])
+    methods = numpy.array(["t-test", "t-test_overestim_var", "logreg", "wilcoxon"])
 
     DEAForm = forms.getDEAForm(list_labels, methods)
     form = DEAForm(request.form)
