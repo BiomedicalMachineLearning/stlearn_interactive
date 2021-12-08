@@ -5,6 +5,7 @@
 
 import sys
 import numpy
+import numpy as np
 from flask import flash
 from source.forms import forms
 
@@ -106,11 +107,9 @@ def run_lr(request, adata, step_log):
                       distance=dist, n_pairs=element_values[3],
                       n_cpus=element_values[-1])
 
-        # TODO make it detect if LR analysis already complete in anndata
-        # TODO remove commit so can make sure anndata not pushed to github.
-        step_log["lr"][0] = True
-
         flash("LR analysis is completed!")
+
+    step_log["lr"][0] = 'lr_summary' in adata.uns
 
     updated_page = render_template(
         "lr.html",
@@ -155,15 +154,14 @@ def run_cci(request, adata, step_log):
                                   n_perms=element_values[4]
                                   )
 
-                # TODO make it detect if CCI analysis already complete in anndata
-                step_log["cci"][0] = True
-
                 flash("CCI analysis is completed!")
 
             except Exception as msg:
                 traceback.print_exc(file=sys.stdout)
                 flash("Analysis ERROR: " + str(msg))
                 print(msg)
+
+    step_log["cci"][0] = np.any(['lr_cci_' in key for key in adata.uns])
 
     updated_page = render_template(
         "cci.html",

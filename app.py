@@ -1,3 +1,6 @@
+# TODO:
+#   Add visualisation for LR analysis and CCI
+
 from flask import (
     Flask,
     render_template,
@@ -19,6 +22,7 @@ import os, sys
 import stlearn
 import scanpy
 import numpy
+import numpy as np
 
 import asyncio
 from bokeh.server.server import BaseServer
@@ -240,6 +244,7 @@ def file_uploader():
         except:
             flash("Upload ERROR: Please choose the right AnnData file ")
 
+        ### Updating log file with current anndata state ###
         step_log["uploaded"][0] = True
 
         if "n_cells" in adata.var.columns:
@@ -252,6 +257,9 @@ def file_uploader():
 
         if "global_graph" in adata.uns:
             step_log["psts"][0] = True
+
+        step_log["lr"][0] = 'lr_summary' in adata.uns
+        step_log["cci"][0] = np.any(['lr_cci_' in key for key in adata.uns])
 
         return redirect(url_for("upload"))
 
