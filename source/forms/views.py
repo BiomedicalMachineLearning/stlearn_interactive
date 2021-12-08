@@ -144,16 +144,16 @@ def run_cci(request, adata, step_log):
                     cell_alpha=0.7,
                     use_het="merged_pvalues" if cell_het else "lr_pvalues",
                 )
-                savePlot("cci-log10pvalues.png")
+                savePlot("cci_rank-log10pvalues.png")
 
                 st.pl.het_plot(
                     adata,
                     cell_alpha=0.7,
                     use_het="merged_sign" if cell_het else "lr_sign",
                 )
-                savePlot("cci-sig-log10pvalues.png")
+                savePlot("cci_rank-sig-log10pvalues.png")
 
-            step_log["cci"][0] = True
+            step_log["cci_rank"][0] = True
 
             flash("CCI analysis is completed!")
 
@@ -163,8 +163,8 @@ def run_cci(request, adata, step_log):
             print(msg)
 
     updated_page = render_template(
-        "cci.html",
-        title=step_log["cci"][1],
+        "cci_rank.html",
+        title=step_log["cci_rank"][1],
         cci_form=form,
         flash_bool=True,
         step_log=step_log,

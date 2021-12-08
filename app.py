@@ -45,7 +45,7 @@ step_log = {
     "preprocessed": [False, "Preprocessing"],
     "clustering": [False, "Clustering"],
     "psts": [False, "Spatial trajectory"],
-    "cci": [False, "Cell-cell interaction"],
+    "cci_rank": [False, "Cell-cell interaction"],
     "dea": [False, "DEA"],
     # _params suffix important for templates/progress.html
     "preprocessed_params": {},
@@ -92,7 +92,7 @@ def clustering():
     return updated_page
 
 
-@app.route("/cci", methods=["GET", "POST"])
+@app.route("/cci_rank", methods=["GET", "POST"])
 def cci():
     global adata, step_log
     updated_page = views.run_cci(request, adata, step_log)
@@ -184,7 +184,7 @@ def folder_uploader():
                     "preprocessed": [False, "Preprocessing"],
                     "clustering": [False, "Clustering"],
                     "psts": [False, "Spatial trajectory"],
-                    "cci": [False, "Cell-cell interaction"],
+                    "cci_rank": [False, "Cell-cell interaction"],
                     "dea": [False, "Differential expression analysis"],
                     # _params suffix important for templates/progress.html
                     "preprocessed_params": {},
@@ -355,8 +355,8 @@ def save_adata():
 # sc.pp.scale(adata)g
 
 # adata.uns["lr"] = ['Gfap_Ctss']
-# st.tl.cci.lr(adata=adata)
-# st.tl.cci.permutation(adata,n_pairs=1)
+# st.tl.cci_rank.lr(adata=adata)
+# st.tl.cci_rank.permutation(adata,n_pairs=1)
 
 # sc.pp.pca(adata)
 # sc.pp.neighbors(adata)
