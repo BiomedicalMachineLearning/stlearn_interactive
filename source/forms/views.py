@@ -21,9 +21,9 @@ from scipy.spatial.distance import cosine
 
 # Creating the forms using a class generator #
 PreprocessForm = forms.getPreprocessForm()
-CCIForm = forms.getCCIForm()
+#CCIForm = forms.getCCIForm() #OLD
 ClusterForm = forms.getClusterForm()
-
+LRForm = forms.getLRForm()
 
 def run_preprocessing(request, adata, step_log):
     """Performs the scanpy pre-processing steps based on the inputted data."""
@@ -76,21 +76,11 @@ def run_preprocessing(request, adata, step_log):
 
     return updated_page
 
+def run_lr(request, adata, step_log):
+    """ Runs LR analysis.
+    """
 
-def run_cci(request, adata, step_log):
-    """Performs CCI analysis."""
-
-    form = CCIForm(request.form)
-
-    step_log["cci_params"] = vhs.getData(form)
-    print(step_log["cci_params"], file=sys.stdout)
-    elements = numpy.array(list(step_log["cci_params"].keys()))
-    # order: cell_het file, neighbour_dist, L-R pairs, permutations
-    element_values = list(step_log["cci_params"].values())
-
-    cell_het = type(element_values[0]) != type(None)
-    lrs, msg = vhs.getLR(element_values[2], adata.var_names)
-    print(lrs, file=sys.stdout)
+    form = LRForm(request.form)
 
     if not form.validate_on_submit():
         flash_errors(form)
@@ -98,73 +88,85 @@ def run_cci(request, adata, step_log):
     elif type(adata) == type(None):
         flash("Need to load data first!")
 
-    elif msg != "":
-        flash(msg)
-
     else:
-        """If we have been through the steps of:
-        1. Choosing with/without cell heterogeneity information.
-        2. Choosing with/without permutation testing.
-        3. Filling out information.
-        We are now ready to take the form input & perform CCI analysis.
-        """
-        try:
-            adata.uns["lr"] = lrs
-            st.tl.cci.lr(adata=adata, distance=element_values[1])
-            st.pl.het_plot(adata, use_het="cci_lr", image_alpha=0.7)
-            savePlot("cell_lr.png")
+        step_log["lr_params"] = vhs.getData(form)
+        print(step_log["lr_params"], file=sys.stdout)
+        elements = numpy.array(list(step_log["lr_params"].keys()))
+        # order: Species, Spot neighbourhood, min_spots, n_pairs, CPUs
+        element_values = list(step_log["lr_params"].values())
+        dist = element_values[1]
+        dist = dist if dist!=-1 else None
 
-            dist, n_pairs = element_values[1], element_values[-1]
-            if cell_het:  # Conduct with cell heterogeneity information #
-                print("We are using the cell heterogeneity!", file=sys.stdout)
-                # Adding the label transfer information #
-                st.add.labels(adata, element_values[0], sep="\t")
-                st.pl.cluster_plot(adata, use_label="predictions")
-                savePlot("label_transfer.png")  # saves to temp_pots
+        # Loading the LR databases available within stlearn (from NATMI)
+        lrs = st.tl.cci.load_lrs(['connectomeDB2020_lit'],
+                                 species=element_values[0])
 
-                # Calculating cell heterogeneity #
-                st.tl.cci.het.count(adata, distance=dist, use_label="label_transfer")
-                st.pl.het_plot(adata, use_het="cci_het")
-                savePlot("cell_het.png")
+        # Running the analysis #
+        st.tl.cci.run(adata, lrs, min_spots=element_values[2],
+                      distance=dist, n_pairs=element_values[3],
+                      n_cpus=element_values[-1])
 
-                # Merging with the lR values #
-                st.tl.cci.merge(adata, use_lr="cci_lr", use_het="cci_het")
-                st.pl.het_plot(adata, use_het="merged", cell_alpha=0.7)
-                savePlot("merged.png")
+        # TODO make it detect if LR analysis already complete in anndata
+        step_log["lr"][0] = True
 
-            if n_pairs != 0:  # Permutation testing #
-                st.tl.cci.permutation(
-                    adata,
-                    use_het="cci_het" if cell_het else None,
-                    n_pairs=n_pairs,
-                    distance=dist,
-                )
-                st.pl.het_plot(
-                    adata,
-                    cell_alpha=0.7,
-                    use_het="merged_pvalues" if cell_het else "lr_pvalues",
-                )
-                savePlot("cci_rank-log10pvalues.png")
-
-                st.pl.het_plot(
-                    adata,
-                    cell_alpha=0.7,
-                    use_het="merged_sign" if cell_het else "lr_sign",
-                )
-                savePlot("cci_rank-sig-log10pvalues.png")
-
-            step_log["cci_rank"][0] = True
-
-            flash("CCI analysis is completed!")
-
-        except Exception as msg:
-            traceback.print_exc(file=sys.stdout)
-            flash("Analysis ERROR: " + str(msg))
-            print(msg)
+        flash("LR analysis is completed!")
 
     updated_page = render_template(
-        "cci_rank.html",
-        title=step_log["cci_rank"][1],
+        "lr.html",
+        title=step_log["lr"][1],
+        lr_form=form,
+        flash_bool=True,
+        step_log=step_log,
+    )
+    return updated_page
+
+def run_cci(request, adata, step_log):
+    """Performs CCI analysis."""
+
+    CCIForm = forms.getCCIForm(adata)
+    form = CCIForm(request.form)
+
+    if not form.validate_on_submit():
+        flash_errors(form)
+
+    elif type(adata) == type(None):
+        flash("Need to load data first!")
+
+    else:
+        step_log["cci_params"] = vhs.getData(form)
+        print(step_log["cci_params"], file=sys.stdout)
+        elements = numpy.array(list(step_log["cci_params"].keys()))
+        # order: cell_type, min_spots, spot_mixtures, cell_prop_cutoff, sig_spots
+        #           n_perms
+        element_values = list(step_log["cci_params"].values())
+
+        if not form.validate_on_submit():
+            flash_errors(form)
+
+        else:
+            try:
+                # Running the counting of co-occurence of cell types and LR expression #
+                st.tl.cci.run_cci(adata, element_values[0],
+                                  min_spots=element_values[1],
+                                  spot_mixtures=element_values[2],
+                                  cell_prop_cutoff=element_values[3],
+                                  sig_spots=True,#Should make this not optional..
+                                  n_perms=element_values[4]
+                                  )
+
+                # TODO make it detect if CCI analysis already complete in anndata
+                step_log["cci"][0] = True
+
+                flash("CCI analysis is completed!")
+
+            except Exception as msg:
+                traceback.print_exc(file=sys.stdout)
+                flash("Analysis ERROR: " + str(msg))
+                print(msg)
+
+    updated_page = render_template(
+        "cci.html",
+        title=step_log["cci"][1],
         cci_form=form,
         flash_bool=True,
         step_log=step_log,
@@ -392,3 +394,109 @@ def run_dea(request, adata, step_log):
     )
 
     return updated_page
+
+""" Junk code:
+
+def run_cci(request, adata, step_log):
+    #Performs CCI analysis.#
+
+    form = CCIForm(request.form)
+
+    if not form.validate_on_submit():
+        flash_errors(form)
+
+    elif type(adata) == type(None):
+        flash("Need to load data first!")
+
+    else:
+        step_log["cci_params"] = vhs.getData(form)
+        print(step_log["cci_params"], file=sys.stdout)
+        elements = numpy.array(list(step_log["cci_params"].keys()))
+        # order: cell_het file, neighbour_dist, L-R pairs, permutations
+        element_values = list(step_log["cci_params"].values())
+
+        cell_het = type(element_values[0]) != type(None)
+        lrs, msg = vhs.getLR(element_values[2], adata.var_names)
+        print(lrs, file=sys.stdout)
+
+        if not form.validate_on_submit():
+            flash_errors(form)
+
+        elif type(adata) == type(None):
+            flash("Need to load data first!")
+
+        elif msg != "":
+            flash(msg)
+
+        else:
+            # If we have been through the steps of:
+            # 1. Choosing with/without cell heterogeneity information.
+            # 2. Choosing with/without permutation testing.
+            # 3. Filling out information.
+            # We are now ready to take the form input & perform CCI analysis.
+            
+            try:
+                adata.uns["lr"] = lrs
+                st.tl.cci.lr(adata=adata, distance=element_values[1])
+                st.pl.het_plot(adata, use_het="cci_lr", image_alpha=0.7)
+                savePlot("cell_lr.png")
+
+                dist, n_pairs = element_values[1], element_values[-1]
+                if cell_het:  # Conduct with cell heterogeneity information #
+                    print("We are using the cell heterogeneity!", file=sys.stdout)
+                    # Adding the label transfer information #
+                    st.add.labels(adata, element_values[0], sep="\t")
+                    st.pl.cluster_plot(adata, use_label="predictions")
+                    savePlot("label_transfer.png")  # saves to temp_pots
+
+                    # Calculating cell heterogeneity #
+                    st.tl.cci.het.count(adata, distance=dist, use_label="label_transfer")
+                    st.pl.het_plot(adata, use_het="cci_het")
+                    savePlot("cell_het.png")
+
+                    # Merging with the lR values #
+                    st.tl.cci.merge(adata, use_lr="cci_lr", use_het="cci_het")
+                    st.pl.het_plot(adata, use_het="merged", cell_alpha=0.7)
+                    savePlot("merged.png")
+
+                if n_pairs != 0:  # Permutation testing #
+                    st.tl.cci.permutation(
+                        adata,
+                        use_het="cci_het" if cell_het else None,
+                        n_pairs=n_pairs,
+                        distance=dist,
+                    )
+                    st.pl.het_plot(
+                        adata,
+                        cell_alpha=0.7,
+                        use_het="merged_pvalues" if cell_het else "lr_pvalues",
+                    )
+                    savePlot("cci_rank-log10pvalues.png")
+
+                    st.pl.het_plot(
+                        adata,
+                        cell_alpha=0.7,
+                        use_het="merged_sign" if cell_het else "lr_sign",
+                    )
+                    savePlot("cci_rank-sig-log10pvalues.png")
+
+                step_log["cci_rank"][0] = True
+
+                flash("CCI analysis is completed!")
+
+            except Exception as msg:
+                traceback.print_exc(file=sys.stdout)
+                flash("Analysis ERROR: " + str(msg))
+                print(msg)
+
+    updated_page = render_template(
+        "cci.html",
+        title=step_log["cci_rank"][1],
+        cci_form=form,
+        flash_bool=True,
+        step_log=step_log,
+    )
+
+    return updated_page
+"""
+

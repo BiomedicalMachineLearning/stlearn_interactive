@@ -45,14 +45,16 @@ step_log = {
     "preprocessed": [False, "Preprocessing"],
     "clustering": [False, "Clustering"],
     "psts": [False, "Spatial trajectory"],
-    "cci_rank": [False, "Cell-cell interaction"],
     "dea": [False, "DEA"],
+    "lr": [False, "Ligand-receptor analysis"],
+    "cci": [False, "CCI"],
     # _params suffix important for templates/progress.html
     "preprocessed_params": {},
     "cci_params": {},
     "cluster_params": {},
     "psts_params": {},
     "dea_params": {},
+    "lr_params": {}
 }
 
 # print(stlearn, file=sys.stdout)
@@ -91,13 +93,17 @@ def clustering():
     updated_page = views.run_clustering(request, adata, step_log)
     return updated_page
 
+@app.route("/lr", methods=["GET", "POST"])
+def lr():
+    global adata, step_log
+    updated_page = views.run_lr(request, adata, step_log)
+    return updated_page
 
-@app.route("/cci_rank", methods=["GET", "POST"])
+@app.route("/cci", methods=["GET", "POST"])
 def cci():
     global adata, step_log
     updated_page = views.run_cci(request, adata, step_log)
     return updated_page
-
 
 @app.route("/psts", methods=["GET", "POST"])
 def psts():

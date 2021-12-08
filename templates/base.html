@@ -66,6 +66,11 @@
               <i class="material-icons">settings_suggest</i>
               <p>Preprocessing</p>
             </a>
+          </li><li class="nav-item">
+            <a class="nav-link disabled" id="lr" href="/lr">
+              <i class="material-icons">cable</i>
+              <p>Ligand-receptor interaction</p>
+            </a>
           </li>
           <li class="nav-item">
             <a class="nav-link disabled" id="cci" href="/cci">
@@ -173,6 +178,7 @@
     {% endif %}
 
     {% if step_log.preprocessed[0] %}
+      $( "#lr" ).removeClass( "disabled" )
       $( "#cci" ).removeClass( "disabled" )
       $( "#clustering" ).removeClass( "disabled" )
     {% endif %}
