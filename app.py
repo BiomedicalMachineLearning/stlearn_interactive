@@ -428,7 +428,8 @@ def modify_doc_cci_plot(doc):
     gp_object.data_alpha.on_change("value", gp_object.update_data)
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
     gp_object.spot_size.on_change("value", gp_object.update_data)
-    gp_object.het_select.on_change("value", gp_object.update_data)
+    #gp_object.het_select.on_change("value", gp_object.update_data)
+    gp_object.lr_select.on_change("value", gp_object.update_data)
     gp_object.output_backend.on_change("value", gp_object.update_data)
 
 
