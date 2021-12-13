@@ -316,17 +316,27 @@ def cluster_plot():
     )
 
 
-@app.route("/cci_plot")
-def cci_plot():
-    script = server_document("http://127.0.0.1:5006/bokeh_cci_plot")
+@app.route("/lr_plot")
+def lr_plot():
+    script = server_document("http://127.0.0.1:5006/bokeh_lr_plot")
     return render_template(
-        "cci_plot.html",
+        "lr_plot.html",
         script=script,
         template="Flask",
         relative_urls=False,
         step_log=step_log,
     )
 
+@app.route("/spatial_cci_plot")
+def spatial_cci_plot():
+    script = server_document("http://127.0.0.1:5006/bokeh_spatial_cci_plot")
+    return render_template(
+        "spatial_cci_plot.html",
+        script=script,
+        template="Flask",
+        relative_urls=False,
+        step_log=step_log,
+    )
 
 @app.route("/annotate_plot")
 def annotate_plot():
@@ -418,7 +428,7 @@ def modify_doc_cluster_plot(doc):
         gp_object.plot_select.on_change("value", gp_object.update_data)
         gp_object.min_logfoldchange.on_change("value", gp_object.update_data)
 
-
+""" # TODO impliment this with some CCIs #
 def modify_doc_cci_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehCciPlot
 
@@ -431,7 +441,35 @@ def modify_doc_cci_plot(doc):
     #gp_object.het_select.on_change("value", gp_object.update_data)
     gp_object.lr_select.on_change("value", gp_object.update_data)
     gp_object.output_backend.on_change("value", gp_object.update_data)
+"""
 
+def modify_doc_spatial_cci_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehSpatialCciPlot
+
+    gp_object = BokehSpatialCciPlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
+
+    gp_object.annot_select.on_change("value", gp_object.update_list)
+    gp_object.annot_select.on_change("value", gp_object.update_data)
+    gp_object.lr_select.on_change("value", gp_object.update_data)
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)
+    gp_object.list_cluster.on_change("active", gp_object.update_data)
+    gp_object.output_backend.on_change("value", gp_object.update_data)
+
+def modify_doc_lr_plot(doc):
+    from stlearn.plotting.classes_bokeh import BokehLRPlot
+
+    gp_object = BokehLRPlot(adata)
+    doc.add_root(row(gp_object.layout, width=800))
+
+    gp_object.data_alpha.on_change("value", gp_object.update_data)
+    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
+    gp_object.spot_size.on_change("value", gp_object.update_data)
+    #gp_object.het_select.on_change("value", gp_object.update_data)
+    gp_object.lr_select.on_change("value", gp_object.update_data)
+    gp_object.output_backend.on_change("value", gp_object.update_data)
 
 def modify_doc_annotate_plot(doc):
     from stlearn.plotting.classes_bokeh import Annotate
@@ -449,8 +487,11 @@ bkapp = Application(FunctionHandler(modify_doc_gene_plot))
 # App for cluster_plot
 bkapp2 = Application(FunctionHandler(modify_doc_cluster_plot))
 
-# App for cci_plot
-bkapp3 = Application(FunctionHandler(modify_doc_cci_plot))
+# App for lr_plot
+bkapp3 = Application(FunctionHandler(modify_doc_lr_plot))
+
+# App for cci_spatial_plot
+bkapp3_1 = Application(FunctionHandler(modify_doc_spatial_cci_plot))
 
 # App for annotate_plot
 bkapp4 = Application(FunctionHandler(modify_doc_annotate_plot))
@@ -463,7 +504,9 @@ def bk_worker():
         {
             "/bokeh_gene_plot": bkapp,
             "/bokeh_cluster_plot": bkapp2,
-            "/bokeh_cci_plot": bkapp3,
+            #"/bokeh_cci_plot": bkapp3,
+            "/bokeh_lr_plot": bkapp3,
+            "/bokeh_spatial_cci_plot": bkapp3_1,
             "/bokeh_annotate_plot": bkapp4,
         },
         io_loop=IOLoop(),

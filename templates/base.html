@@ -115,9 +115,15 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link disabled" id="cci_plot" href="/cci_plot">
+            <a class="nav-link disabled" id="lr_plot" href="/lr_plot">
               <i class="material-icons">calendar_view_month</i>
-              <p>Cci plot</p>
+              <p>LR plot</p>
+            </a>
+          </li>
+	        <li class="nav-item">
+            <a class="nav-link disabled" id="spatial_cci_plot" href="/spatial_cci_plot">
+              <i class="material-icons">calendar_view_month</i>
+              <p>Spatial CCI plot</p>
             </a>
           </li>
           <!-- your sidebar here -->
@@ -169,6 +175,11 @@
 
     {% if step_log.cci[0] %}
       $( "#cci_plot" ).removeClass( "disabled" )
+      $( "#spatial_cci_plot" ).removeClass( "disabled" )
+    {% endif %}
+
+    {% if step_log.lr[0] %}
+      $( "#lr_plot" ).removeClass( "disabled" )
     {% endif %}
 
     {% if step_log.clustering[0] %}
