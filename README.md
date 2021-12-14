@@ -28,9 +28,9 @@ Run the stlearn interactive app:
 
 ``` FLASK_APP=app.py flask run ```
 
-# Tutorial
-The GUI app should be largely intuitive, but just to add extra detail you can
-see the tutorial here:
+## Step 4: Tutorial
+
+- [Tutorial - stLearn Interactive](https://github.com/BiomedicalMachineLearning/stlearn_interactive/blob/brad_dev/docs/stlearn_interactive_tutorial.pdf)
 
 
 
