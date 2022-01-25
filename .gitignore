@@ -17,3 +17,6 @@ temp_tiling/
 tiling/
 .DS_Store
 uploads/*
+temp_plots/
+temp_tiling/
+tiling/
