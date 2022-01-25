@@ -7,6 +7,9 @@ dist/
 stlearn/static/*
 uploads/spatial
 uploads/filtered_feature_bc_matrix.h5
+uploads/*.h5ad
+temp_plots/
+temp_tiling/
 temp_tiling/
 temp_plots/*
 temp_plots/

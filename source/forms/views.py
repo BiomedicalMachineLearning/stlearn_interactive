@@ -107,6 +107,7 @@ def run_lr(request, adata, step_log):
                       n_cpus=element_values[-1])
 
         # TODO make it detect if LR analysis already complete in anndata
+        # TODO remove commit so can make sure anndata not pushed to github.
         step_log["lr"][0] = True
 
         flash("LR analysis is completed!")
