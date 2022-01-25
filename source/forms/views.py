@@ -106,7 +106,6 @@ def run_lr(request, adata, step_log):
         st.tl.cci.run(adata, lrs, min_spots=element_values[2],
                       distance=dist, n_pairs=element_values[3],
                       n_cpus=element_values[-1])
-
         flash("LR analysis is completed!")
 
     step_log["lr"][0] = 'lr_summary' in adata.uns
