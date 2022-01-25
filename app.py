@@ -189,20 +189,20 @@ def folder_uploader():
             if len(uploaded) == 5:
                 flash("File uploaded successfully")
                 global adata, step_log
-                step_log = {
-                    "uploaded": [False, "Upload file"],
-                    "preprocessed": [False, "Preprocessing"],
-                    "clustering": [False, "Clustering"],
-                    "psts": [False, "Spatial trajectory"],
-                    "cci_rank": [False, "Cell-cell interaction"],
-                    "dea": [False, "Differential expression analysis"],
-                    # _params suffix important for templates/progress.html
-                    "preprocessed_params": {},
-                    "cci_params": {},
-                    "cluster_params": {},
-                    "psts_params": {},
-                    "dea_params": {},
-                }
+                # step_log = {
+                #     "uploaded": [False, "Upload file"],
+                #     "preprocessed": [False, "Preprocessing"],
+                #     "clustering": [False, "Clustering"],
+                #     "psts": [False, "Spatial trajectory"],
+                #     "cci_rank": [False, "Cell-cell interaction"],
+                #     "dea": [False, "Differential expression analysis"],
+                #     # _params suffix important for templates/progress.html
+                #     "preprocessed_params": {},
+                #     "cci_params": {},
+                #     "cluster_params": {},
+                #     "psts_params": {},
+                #     "dea_params": {},
+                # }
                 adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
                 adata.var_names_make_unique()  # removing duplicates
                 # ensuring compatible format for CCI, since need _ to pair LRs #

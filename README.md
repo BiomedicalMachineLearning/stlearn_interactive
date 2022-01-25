@@ -28,3 +28,12 @@ Run the stlearn interactive app:
 
 ``` FLASK_APP=app.py flask run ```
 
+# Tutorial
+The GUI app should be largely intuitive, but just to add extra detail you can
+see the tutorial here:
+
+
+
+
+
+
