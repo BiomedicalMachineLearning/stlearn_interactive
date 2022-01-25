@@ -9,4 +9,8 @@ uploads/spatial
 uploads/filtered_feature_bc_matrix.h5
 temp_tiling/
 temp_plots/*
+temp_plots/
+temp_tiling/
 tiling/
+.DS_Store
+uploads/*
