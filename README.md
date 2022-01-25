@@ -32,8 +32,3 @@ Run the stlearn interactive app:
 
 - [Tutorial - stLearn Interactive](https://github.com/BiomedicalMachineLearning/stlearn_interactive/blob/brad_dev/docs/stlearn_interactive_tutorial.pdf)
 
-
-
-
-
-
