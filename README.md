@@ -1,15 +1,9 @@
-# stlearn-bokeh
-stlearn with interactive web app
+# Tutorial how to run i-stLearn
+We build a webapp version that wrap stLearn functions.
 
 ## Step 1:
 
-Install stlearn dev version by:
-
-``` git clone https://github.com/BiomedicalMachineLearning/stLearn ```
-
-``` cd stLearn ```
-
-``` python setup.py install ```
+Install stlearn by this instruction: https://stlearn.readthedocs.io/en/latest/installation.html
 
 
 ## Step 2:
@@ -30,5 +24,5 @@ Run the stlearn interactive app:
 
 ## Step 4: Tutorial
 
-- [Tutorial - stLearn Interactive](https://github.com/BiomedicalMachineLearning/stlearn_interactive/blob/brad_dev/docs/stlearn_interactive_tutorial.pdf)
+- [Tutorial - stLearn Interactive](https://github.com/BiomedicalMachineLearning/stlearn_interactive/blob/master/docs/stlearn_interactive_tutorial.pdf)
 
