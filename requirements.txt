@@ -1,9 +1,6 @@
-Flask==1.1.4
-WTForms==2.3.1
-markupsafe==2.0.1
-bokeh==2.4.2
-anndata==0.7.8
-matplotlib==3.5.1
-scanpy==1.8.2
-flask_wtf
-
+Flask==2.0.3
+flask_wtf==1.0.0
+gunicorn
+markupsafe==2.1.0
+stlearn
+WTForms==3.0.1

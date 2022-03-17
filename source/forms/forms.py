@@ -158,6 +158,7 @@ def getPreprocessForm():
     element_values = ["", 200, 300, "", 3, 5, "", True, True, True]
     return createSuperForm(elements, element_fields, element_values)
 
+
 def getLRForm():
     """Gets the LR form generated from the superform above.
 
@@ -188,35 +189,39 @@ def getLRForm():
     ]
     return createSuperForm(elements, element_fields, element_values)
 
+
 def getCCIForm(adata):
     """Gets the CCI form generated from the superform above.
 
-        Returns:
-                FlaskForm: With attributes that allow for inputs that are
-                                                        related to CCI analysis.
-        """
+    Returns:
+            FlaskForm: With attributes that allow for inputs that are
+                                                    related to CCI analysis.
+    """
     elements = [
         "Cell information (only discrete labels available, unless mixture already in anndata.uns)",
         "Minimum spots for LR to be considered",
         "Spot mixture (only if the 'Cell Information' label selected available in anndata.uns)",
         "Cell proportion cutoff (value above which cell is considered in spot if 'Spot mixture' selected)",
-        "Permutations (recommend atleast 1000)"
+        "Permutations (recommend atleast 1000)",
     ]
-    element_fields = ["SelectField",
-                      "IntegerField",
-                      "BooleanField",
-                      "FloatField",
-                      "IntegerField",
-                      ]
+    element_fields = [
+        "SelectField",
+        "IntegerField",
+        "BooleanField",
+        "FloatField",
+        "IntegerField",
+    ]
     if type(adata) == type(None):
         fields = []
         mix = False
     else:
-        fields = [key for key in adata.obs.keys()
-                  if type(adata.obs[key].values[0])==str]
+        fields = [
+            key for key in adata.obs.keys() if type(adata.obs[key].values[0]) == str
+        ]
         mix = fields[0] in adata.uns.keys()
     element_values = [fields, 20, mix, 0.2, 100]
     return createSuperForm(elements, element_fields, element_values)
+
 
 def getCCIForm_old():
     """Gets the CCI form generated from the superform above.
@@ -234,6 +239,7 @@ def getCCIForm_old():
     element_fields = ["FileField", "IntegerField", "StringField", "IntegerField"]
     element_values = ["", 25, "", 0]
     return createSuperForm(elements, element_fields, element_values)
+
 
 def getClusterForm():
     """Gets the Cluster form generated using superform above.

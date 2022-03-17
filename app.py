@@ -1,4 +1,3 @@
-
 from flask import (
     Flask,
     render_template,
@@ -15,6 +14,7 @@ from bokeh.resources import INLINE
 from werkzeug.utils import secure_filename
 import tempfile
 import traceback
+from datetime import timedelta
 
 import os, sys
 import stlearn
@@ -56,58 +56,62 @@ step_log = {
     "cluster_params": {},
     "psts_params": {},
     "dea_params": {},
-    "lr_params": {}
+    "lr_params": {},
 }
 
 # print(stlearn, file=sys.stdout)
 
-app = Flask(__name__)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+server = Flask(__name__)
+server.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+server.config["PERMANENT_SESSION_LIFETIME"] = timedelta(seconds=20)
 
 UPLOAD_FOLDER = "uploads/"
 TEMPLATES_AUTO_RELOAD = True
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-app.config["TEMPLATES_AUTO_RELOAD"] = TEMPLATES_AUTO_RELOAD
-app.config["SESSION_PERMANENT"] = False
+server.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+server.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+server.config["TEMPLATES_AUTO_RELOAD"] = TEMPLATES_AUTO_RELOAD
+server.config["SESSION_PERMANENT"] = False
 
 
-@app.route("/", methods=["GET"])
+@server.route("/", methods=["GET"])
 def index():
     return render_template("index.html", step_log=step_log)
 
 
-@app.route("/upload")
+@server.route("/upload")
 def upload():
     return render_template("upload.html", step_log=step_log, flash_bool=True)
 
 
-@app.route("/preprocessing", methods=["GET", "POST"])
+@server.route("/preprocessing", methods=["GET", "POST"])
 def preprocessing():
     global adata, step_log
     updated_page = views.run_preprocessing(request, adata, step_log)
     return updated_page
 
 
-@app.route("/clustering", methods=["GET", "POST"])
+@server.route("/clustering", methods=["GET", "POST"])
 def clustering():
     global adata, step_log
     updated_page = views.run_clustering(request, adata, step_log)
     return updated_page
 
-@app.route("/lr", methods=["GET", "POST"])
+
+@server.route("/lr", methods=["GET", "POST"])
 def lr():
     global adata, step_log
     updated_page = views.run_lr(request, adata, step_log)
     return updated_page
 
-@app.route("/cci", methods=["GET", "POST"])
+
+@server.route("/cci", methods=["GET", "POST"])
 def cci():
     global adata, step_log
     updated_page = views.run_cci(request, adata, step_log)
     return updated_page
 
-@app.route("/psts", methods=["GET", "POST"])
+
+@server.route("/psts", methods=["GET", "POST"])
 def psts():
     global adata, step_log
 
@@ -118,7 +122,7 @@ def psts():
         return updated_page
 
 
-@app.route("/dea", methods=["GET", "POST"])
+@server.route("/dea", methods=["GET", "POST"])
 def dea():
     global adata, step_log
     updated_page = views.run_dea(request, adata, step_log)
@@ -134,21 +138,21 @@ allow_files = [
 ]
 
 
-@app.route("/folder_uploader", methods=["GET", "POST"])
+@server.route("/folder_uploader", methods=["GET", "POST"])
 def folder_uploader():
     if request.method == "POST":
         # Clean uploads folder before upload a new data
         import shutil
 
-        shutil.rmtree(app.config["UPLOAD_FOLDER"])
-        os.makedirs(app.config["UPLOAD_FOLDER"])
-        open(app.config["UPLOAD_FOLDER"] + "/.gitkeep", "a").close()
+        shutil.rmtree(server.config["UPLOAD_FOLDER"])
+        os.makedirs(server.config["UPLOAD_FOLDER"])
+        open(server.config["UPLOAD_FOLDER"] + "/.gitkeep", "a").close()
         # os.mknod()
 
         # Get list of files from selected folder
         files = request.files.getlist("file")
 
-        os.mkdir(os.path.join(app.config["UPLOAD_FOLDER"], "spatial"))
+        os.mkdir(os.path.join(server.config["UPLOAD_FOLDER"], "spatial"))
 
         # allow_upload_files = list(map(lambda x: x ),allow_files)
 
@@ -158,31 +162,34 @@ def folder_uploader():
 
             filename = secure_filename(file.filename)
 
+            print(filename)
+
             if allow_files[0] in filename:
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                file.save(os.path.join(server.config["UPLOAD_FOLDER"], filename))
                 os.rename(
-                    os.path.join(app.config["UPLOAD_FOLDER"], filename),
-                    os.path.join(app.config["UPLOAD_FOLDER"], allow_files[0]),
+                    os.path.join(server.config["UPLOAD_FOLDER"], filename),
+                    os.path.join(server.config["UPLOAD_FOLDER"], allow_files[0]),
                 )
                 uploaded.append(allow_files[0])
 
             for allow_file in allow_files[1:]:
                 if allow_file in filename:
+
                     file.save(
-                        os.path.join(app.config["UPLOAD_FOLDER"] + "/spatial", filename)
+                        os.path.join(
+                            server.config["UPLOAD_FOLDER"] + "/spatial", filename
+                        )
                     )
                     os.rename(
                         os.path.join(
-                            app.config["UPLOAD_FOLDER"] + "/spatial", filename
+                            server.config["UPLOAD_FOLDER"] + "/spatial", filename
                         ),
                         os.path.join(
-                            app.config["UPLOAD_FOLDER"] + "/spatial", allow_file
+                            server.config["UPLOAD_FOLDER"] + "/spatial", allow_file
                         ),
                     )
 
                     uploaded.append(allow_file)
-
-            print(i)
             i += 1
             if len(uploaded) == 5:
                 flash("File uploaded successfully")
@@ -201,7 +208,7 @@ def folder_uploader():
                 #     "psts_params": {},
                 #     "dea_params": {},
                 # }
-                adata = stlearn.Read10X(app.config["UPLOAD_FOLDER"])
+                adata = stlearn.Read10X(server.config["UPLOAD_FOLDER"])
                 adata.var_names_make_unique()  # removing duplicates
                 # ensuring compatible format for CCI, since need _ to pair LRs #
                 adata.var_names = numpy.array(
@@ -221,7 +228,7 @@ def folder_uploader():
             return redirect(url_for("upload"))
 
 
-@app.route("/file_uploader", methods=["GET", "POST"])
+@server.route("/file_uploader", methods=["GET", "POST"])
 def file_uploader():
     if request.method == "POST":
 
@@ -230,15 +237,15 @@ def file_uploader():
         # Clean uploads folder before upload a new data
         import shutil
 
-        shutil.rmtree(app.config["UPLOAD_FOLDER"])
-        os.makedirs(app.config["UPLOAD_FOLDER"])
-        open(app.config["UPLOAD_FOLDER"] + "/.gitkeep", "a").close()
+        shutil.rmtree(server.config["UPLOAD_FOLDER"])
+        os.makedirs(server.config["UPLOAD_FOLDER"])
+        open(server.config["UPLOAD_FOLDER"] + "/.gitkeep", "a").close()
         # os.mknod()
         f = request.files["file"]
         filename = secure_filename(f.filename)
-        f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+        f.save(os.path.join(server.config["UPLOAD_FOLDER"], filename))
         try:
-            adata = scanpy.read_h5ad(app.config["UPLOAD_FOLDER"] + "/" + f.filename)
+            adata = scanpy.read_h5ad(server.config["UPLOAD_FOLDER"] + "/" + f.filename)
         except:
             flash("Upload ERROR: Please choose the right AnnData file ")
 
@@ -256,13 +263,13 @@ def file_uploader():
         if "global_graph" in adata.uns:
             step_log["psts"][0] = True
 
-        step_log["lr"][0] = 'lr_summary' in adata.uns
-        step_log["cci"][0] = np.any(['lr_cci_' in key for key in adata.uns])
+        step_log["lr"][0] = "lr_summary" in adata.uns
+        step_log["cci"][0] = np.any(["lr_cci_" in key for key in adata.uns])
 
         return redirect(url_for("upload"))
 
 
-@app.route("/choose_cluster", methods=["GET", "POST"])
+@server.route("/choose_cluster", methods=["GET", "POST"])
 def choose_cluster():
     menu = []
 
@@ -280,7 +287,7 @@ def choose_cluster():
     )
 
 
-@app.route("/convert_clusters", methods=["GET", "POST"])
+@server.route("/convert_clusters", methods=["GET", "POST"])
 def convert_clusters():
     if request.method == "POST":
         adata.obs["clusters"] = adata.obs[request.form["convert_clusters"]]
@@ -290,9 +297,11 @@ def convert_clusters():
         return redirect(url_for("psts"))
 
 
-@app.route("/gene_plot")
+@server.route("/gene_plot")
 def gene_plot():
-    script = server_document("http://127.0.0.1:5006/bokeh_gene_plot")
+    script = server_document(
+        "http://%s:5006/bokeh_gene_plot" % request.host.split(":")[0]
+    )
     return render_template(
         "gene_plot.html",
         script=script,
@@ -302,9 +311,11 @@ def gene_plot():
     )
 
 
-@app.route("/cluster_plot")
+@server.route("/cluster_plot")
 def cluster_plot():
-    script = server_document("http://127.0.0.1:5006/bokeh_cluster_plot")
+    script = server_document(
+        "http://%s:5006/bokeh_cluster_plot" % request.host.split(":")[0]
+    )
     return render_template(
         "cluster_plot.html",
         script=script,
@@ -314,9 +325,11 @@ def cluster_plot():
     )
 
 
-@app.route("/lr_plot")
+@server.route("/lr_plot")
 def lr_plot():
-    script = server_document("http://127.0.0.1:5006/bokeh_lr_plot")
+    script = server_document(
+        "http://%s:5006/bokeh_lr_plot" % request.host.split(":")[0]
+    )
     return render_template(
         "lr_plot.html",
         script=script,
@@ -325,9 +338,12 @@ def lr_plot():
         step_log=step_log,
     )
 
-@app.route("/spatial_cci_plot")
+
+@server.route("/spatial_cci_plot")
 def spatial_cci_plot():
-    script = server_document("http://127.0.0.1:5006/bokeh_spatial_cci_plot")
+    script = server_document(
+        "http://%s:5006/bokeh_spatial_cci_plot" % request.host.split(":")[0]
+    )
     return render_template(
         "spatial_cci_plot.html",
         script=script,
@@ -336,9 +352,12 @@ def spatial_cci_plot():
         step_log=step_log,
     )
 
-@app.route("/annotate_plot")
+
+@server.route("/annotate_plot")
 def annotate_plot():
-    script = server_document("http://127.0.0.1:5006/bokeh_annotate_plot")
+    script = server_document(
+        "http://%s:5006/bokeh_annotate_plot" % request.host.split(":")[0]
+    )
     return render_template(
         "annotate_plot.html",
         script=script,
@@ -348,7 +367,7 @@ def annotate_plot():
     )
 
 
-@app.route("/save_adata", methods=["POST"])
+@server.route("/save_adata", methods=["POST"])
 def save_adata():
     if request.method == "POST":
         fd, path = tempfile.mkstemp()
@@ -426,20 +445,6 @@ def modify_doc_cluster_plot(doc):
         gp_object.plot_select.on_change("value", gp_object.update_data)
         gp_object.min_logfoldchange.on_change("value", gp_object.update_data)
 
-""" # TODO impliment this with some CCIs #
-def modify_doc_cci_plot(doc):
-    from stlearn.plotting.classes_bokeh import BokehCciPlot
-
-    gp_object = BokehCciPlot(adata)
-    doc.add_root(row(gp_object.layout, width=800))
-
-    gp_object.data_alpha.on_change("value", gp_object.update_data)
-    gp_object.tissue_alpha.on_change("value", gp_object.update_data)
-    gp_object.spot_size.on_change("value", gp_object.update_data)
-    #gp_object.het_select.on_change("value", gp_object.update_data)
-    gp_object.lr_select.on_change("value", gp_object.update_data)
-    gp_object.output_backend.on_change("value", gp_object.update_data)
-"""
 
 def modify_doc_spatial_cci_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehSpatialCciPlot
@@ -456,6 +461,7 @@ def modify_doc_spatial_cci_plot(doc):
     gp_object.list_cluster.on_change("active", gp_object.update_data)
     gp_object.output_backend.on_change("value", gp_object.update_data)
 
+
 def modify_doc_lr_plot(doc):
     from stlearn.plotting.classes_bokeh import BokehLRPlot
 
@@ -465,9 +471,10 @@ def modify_doc_lr_plot(doc):
     gp_object.data_alpha.on_change("value", gp_object.update_data)
     gp_object.tissue_alpha.on_change("value", gp_object.update_data)
     gp_object.spot_size.on_change("value", gp_object.update_data)
-    #gp_object.het_select.on_change("value", gp_object.update_data)
+    # gp_object.het_select.on_change("value", gp_object.update_data)
     gp_object.lr_select.on_change("value", gp_object.update_data)
     gp_object.output_backend.on_change("value", gp_object.update_data)
+
 
 def modify_doc_annotate_plot(doc):
     from stlearn.plotting.classes_bokeh import Annotate
@@ -502,13 +509,18 @@ def bk_worker():
         {
             "/bokeh_gene_plot": bkapp,
             "/bokeh_cluster_plot": bkapp2,
-            #"/bokeh_cci_plot": bkapp3,
+            # "/bokeh_cci_plot": bkapp3,
             "/bokeh_lr_plot": bkapp3,
             "/bokeh_spatial_cci_plot": bkapp3_1,
             "/bokeh_annotate_plot": bkapp4,
         },
         io_loop=IOLoop(),
-        allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"],
+        allow_websocket_origin=[
+            "127.0.0.1:8000",
+            "localhost:8000",
+            "0.0.0.0:8000",
+            "*",
+        ],
     )
     server.start()
     server.io_loop.start()
@@ -518,5 +530,5 @@ from threading import Thread
 
 Thread(target=bk_worker).start()
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5005, debug=True, use_reloader=True)
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5005, debug=True, use_reloader=True)

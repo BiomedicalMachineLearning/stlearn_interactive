@@ -9,7 +9,7 @@
    </div>
    <div class="card-body">
 		<div class="frame">
-			<form action = "http://localhost:5000/folder_uploader" method = "POST" enctype = "multipart/form-data" class = "center">
+			<form action = "{{ url_for('folder_uploader') }}" method = "POST" enctype = "multipart/form-data" class = "center">
 				<div class="title">
 					<h2>Option 1: Open Visium data</h2>
 				</div>
@@ -32,7 +32,7 @@
 
 		<br>
 		<div class="frame">
-			<form action = "http://localhost:5000/file_uploader" method = "POST" enctype = "multipart/form-data" class = "center">
+			<form action = "{{ url_for('file_uploader') }}" method = "POST" enctype = "multipart/form-data" class = "center">
 				<div class="title">
 					<h2>Option 2: Open AnnData object</h2>
 				</div>
